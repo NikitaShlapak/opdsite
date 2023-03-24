@@ -1,16 +1,11 @@
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.views import LoginView
 from django.core.mail import send_mail
 from django.http import HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse_lazy
-from django.views.generic import UpdateView, CreateView
+from django.shortcuts import render, redirect
+from django.views.generic import UpdateView
 
 from .models import *
 from .forms import *
 from .utils import *
-from SNO.env import EMAIL_HOST_USER
-
 
 def page_not_found_view(request, exception):
     data = {
@@ -20,8 +15,7 @@ def page_not_found_view(request, exception):
     return render(request,'404.html', context=data)
 
 def Main(request):
-    projects = Project.objects.all().order_by('-id')
-
+    projects = Project.objects.all().order_by('-date_create')
     if request.GET:
         if 'group' in request.GET:
             group_form = SearchForm({'group': request.GET['group']})
@@ -67,10 +61,10 @@ def Info(request):
 
 def MainFiltered(request, type):
     if type in Project.ProjectStatus:
-        projects = Project.objects.filter(project_status=type).order_by('-id')
+        projects = Project.objects.filter(project_status=type).order_by('-date_create')
 
     elif type in Project.ProjectType:
-        projects = Project.objects.filter(project_type=type).order_by('-id')
+        projects = Project.objects.filter(project_type=type).order_by('-date_create')
     if request.GET:
         if 'group' in request.GET:
             group_form = SearchForm({'group': request.GET['group']})
@@ -104,8 +98,7 @@ def Opd(request):
 
 def ProjectPage(request, project_id):
     project = Project.objects.get(pk=project_id)
-    # get_object_or_404(project)
-    team = project.team.all()
+    team = TeamMember.objects.filter(current_project=project_id).order_by('state')
     group_form = SearchForm()
     reject_form = ProjectRejectForm()
     data = {
@@ -122,8 +115,7 @@ def ProjectPage(request, project_id):
 
 def AddReport(request, project_id):
     project = Project.objects.get(pk=project_id)
-    get_object_or_404(project)
-    team = CustomUser.objects.filter(current_project=project_id)
+    team = TeamMember.objects.filter(current_project=project_id)
 
     if request.method == 'POST':
         form = ProjectReportForm(request.POST, request.FILES)
@@ -160,7 +152,9 @@ def AddProject(request):
         form = ProjectForm(request.POST, request.FILES)
         if form.is_valid():
             if len(form.cleaned_data['long_project_description']) > len(form.cleaned_data['short_project_description']):
-                if (form.cleaned_data['manager'].current_project):
+                if (form.cleaned_data['manager'].current_project and
+                        form.cleaned_data['manager'].state != TeamMember.State.TEACHER and
+                        form.cleaned_data['manager'].state != TeamMember.State.REJECTED):
                     form.add_error(None,
                                    'Этот студент не может быть менеджером проекта, так как уже подал заявку в другой '
                                    'или является менеджером')
@@ -168,7 +162,9 @@ def AddProject(request):
                     try:
                         pr = Project.objects.create(edition_key=generate_edition_key(),**form.cleaned_data)
                         form.cleaned_data['manager'].current_project = pr
-                        form.cleaned_data['manager'].is_free = False
+                        if form.cleaned_data['manager'].state != TeamMember.State.TEACHER:
+                            form.cleaned_data['manager'].state = TeamMember.State.MANAGER
+                            form.cleaned_data['manager'].is_free = False
                         form.cleaned_data['manager'].save()
                         return redirect('MAIN')
                     except:
@@ -192,11 +188,11 @@ def AddTeamMember(request):
         form = TeamMemberForm(request.POST)
         if form.is_valid():
             try:
-                CustomUser.objects.create(**form.cleaned_data)
+                TeamMember.objects.create(**form.cleaned_data)
                 send_mail(
                     'Регистрация',
                     'Вы успешно зарегистрированы на портале iate.projects!',
-                    EMAIL_HOST_USER,
+                    'nikitashlapak04@gmail.com',
                     [form.cleaned_data['email']],
                     fail_silently=True,
                 )
@@ -217,17 +213,17 @@ def AddTeamMember(request):
 
 
 def confirm_app(request, student_id, project_id):
-    student = CustomUser.objects.get(pk=student_id)
+    student = TeamMember.objects.get(pk=student_id)
     project = Project.objects.get(pk=project_id)
-    if student.current_project.pk == project_id:
+    if student.state == TeamMember.State.OBSERVED and student.current_project.pk == project_id:
         try:
-
+            student.state = TeamMember.State.APPLIED
             student.is_free = False
             student.save()
             send_mail(
                 'Изменение статуса участника',
                 f"Ваш статус в проекте {project.name_of_project} изменён: вы приняты в команду.",
-                EMAIL_HOST_USER,
+                'nikitashlapak04@gmail.com',
                 [student.email],
                 fail_silently=True,
             )
@@ -239,15 +235,16 @@ def confirm_app(request, student_id, project_id):
 
 
 def decline_app(request, student_id, project_id):
-    student = CustomUser.objects.get(pk=student_id)
+    student = TeamMember.objects.get(pk=student_id)
     project = Project.objects.get(pk=project_id)
-    if student.current_project.pk == project_id:
+    if student.state == TeamMember.State.OBSERVED and student.current_project.pk == project_id:
         try:
+            student.state = TeamMember.State.REJECTED
             student.save()
             send_mail(
                 'Изменение статуса участника',
                 f"Ваш статус в проекте {project.name_of_project} изменён: ваша заявка отклонена менеджером.",
-                EMAIL_HOST_USER,
+                'nikitashlapak04@gmail.com',
                 [student.email],
                 fail_silently=True,
             )
@@ -266,12 +263,12 @@ def ExpandTeam(request, project_id):
             try:
                 data = form.cleaned_data
                 data['current_project'] = project
-                data['state'] = CustomUser.State.OBSERVED
-                student = CustomUser.objects.create(**data)
+                data['state'] = TeamMember.State.OBSERVED
+                student = TeamMember.objects.create(**data)
                 send_mail(
                     'Заявка на проект подана успешно',
                     f"Вы успешно подали заявку на проект {project.name_of_project}. Вы получите уведомление о её принятии или отклонении менеджером.",
-                    EMAIL_HOST_USER,
+                    'nikitashlapak04@gmail.com',
                     [data['email']],
                     fail_silently=True,
                 )
@@ -285,7 +282,7 @@ def ExpandTeam(request, project_id):
                 send_mail(
                     f'Заявки | {project.name_of_project}',
                     msg,
-                    EMAIL_HOST_USER,
+                    'nikitashlapak04@gmail.com',
                     [project.manager_email],
                     fail_silently=False,
                 )
@@ -353,7 +350,7 @@ def reject_project(request, project_id):
                 send_mail(
                     f'Заявки | {project.name_of_project}',
                     msg,
-                    EMAIL_HOST_USER,
+                    'nikitashlapak04@gmail.com',
                     [project.manager_email],
                     fail_silently=False,
                 )
@@ -390,15 +387,3 @@ class ProjectUpdateView(UpdateView):
         return context
 
 
-class RegisterUser(CreateView):
-    form_class = CustomUserCreationForm
-    template_name = "main/register_user.html"
-    success_url = reverse_lazy('login')
-
-
-class LoginUser(LoginView):
-    form_class = AuthenticationForm
-    template_name = 'main/login.html'
-
-    def get_success_url(self):
-        return reverse_lazy('MAIN')

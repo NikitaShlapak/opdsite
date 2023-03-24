@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from .views import RegisterUser
 
 urlpatterns = [
     path('', views.Main, name='MAIN'),
@@ -8,10 +7,9 @@ urlpatterns = [
     path('OPD/', views.Opd, name='OPD'),
     path('project/<int:project_id>/', views.ProjectPage, name='project'),
     path('info/', views.Info, name='info'),
-    path('register/', RegisterUser.as_view(), name='register'),
     path('project/<int:project_id>/add_report', views.AddReport, name='add_report'),
     path('project/add', views.AddProject, name='add_project'),
-    path('login/', views.LoginUser.as_view(), name='login'),
+    path('register', views.AddTeamMember, name='add_user'),
     path('project/<int:project_id>/register', views.ExpandTeam, name='expand'),
     path('project/<int:project_id>/confirm', views.verify_edition, name='verify_edition'),
     path('project/<int:project_id>/reject', views.reject_project, name='verify_delete'),
