@@ -15,7 +15,7 @@ def page_not_found_view(request, exception):
     return render(request,'404.html', context=data)
 
 def Main(request):
-    projects = Project.objects.all().order_by('-date_create')
+    projects = Project.objects.exclude(project_status=Project.ProjectStatus.REJECTED).order_by('-date_create')
     if request.GET:
         if 'group' in request.GET:
             group_form = SearchForm({'group': request.GET['group']})

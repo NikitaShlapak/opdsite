@@ -18,7 +18,7 @@ def form_title(page='main'):
         title = 'Исследовательские | Research'
     return title
 
-def find_by_group(all_projects=Project.objects.all(), group='group'):
+def find_by_group(all_projects=Project.objects.exclude(project_status=Project.ProjectStatus.REJECTED), group='group'):
     projects = []
     for p in all_projects:
         print(p.target_groups, group, group.upper() == p.target_groups.upper())
