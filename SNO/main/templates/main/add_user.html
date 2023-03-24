@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Проекты | Регистрация | Sign in{% endblock %}
+
+{% block body %}
+
+{% if p %}
+<h1>Регистрация на проект "{{ p.name_of_project }}"</h1>
+<img src=" {{ p.poster.url }} " class="card-img-top" alt="{{ p.poster.url }}" height="300em">
+{% else %}
+<h1>Регистрация менеджера</h1>
+{% endif %}
+
+<form id="form"
+      {% if p %}
+      action="{% url 'expand' p.pk %}"
+      {% else %}
+      action="{% url 'add_user' %}"
+      {% endif %}
+      method="post">
+        {% csrf_token %}
+    <div class="mb-3 text fs-5 text-danger">
+      {{ form.non_field_errors }}
+    </div>
+
+    {{ form.as_p }}
+
+    <button type="submit" class="btn btn-primary">Завершить</button>
+
+</form>
+
+
+
+{% endblock %}

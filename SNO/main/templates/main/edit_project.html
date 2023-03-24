@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Изменение проекта | Edit project {% endblock %}
+
+{% block body %}
+{% if edition_key == project.edition_key %}
+<h1>Изменение проекта | Edit project</h1>
+
+<br>
+<h2>{{ p.name_of_project }}</h2>
+
+<form id="form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+    <div class="mb-3 text fs-5 text-danger">
+      {{ form.non_field_errors }}
+    </div>
+
+        {% for f in form %}
+    {{ f.errors }}
+            {% if f != form.poster %}
+
+                <div class="input-group mb-3">
+                  <span class="input-group-text w-25">
+                          <label for="{{ f.id_for_label }}" class="form-label">{{ f.label }}</label>
+                  </span>
+
+                  {{ f }}
+                    {% if f == form.manager %}
+                    <a  href="{% url 'add_user' %}" role="button" class="btn btn-primary w-25 " type="button" >Зарегистрировать менеджера</a>
+                    {% endif %}
+                </div>
+
+
+{% else %}
+                <div class="mb-3">
+                          <label for="{{ f.id_for_label }}" class="form-label">{{ f.label }}</label>
+
+                  {{ f }}
+                </div>
+{% endif %}
+        {% endfor %}
+
+
+         <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+</form>
+{% else %}
+    <div class="container-fluid mt-5">
+  <h2 class="mb-5">{% block heading %}Error 403 | Access forbidden{% endblock %}</h2>
+        <hr>
+  <h4 class="mb-5">{% block text %} Указан неверный код доступа. Запрос на редактирование проекта отклонён. {% endblock %}</h4>
+  <a href="{% url 'MAIN' %}" role="button" class="btn btn-primary w-25">На главную</a>
+</div>
+{% endif %}
+{% endblock %}

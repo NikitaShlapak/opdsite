@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block body %}
+<div class="container-fluid">
+  <h2> Поиск проектов по названию или куратору: </h2>
+              <form role="search" action="{% url 'MAIN' %}" method="get">
+                <div class="input-group mb-3">
+                    {{ name_form.name }}
+                  <button class="btn btn-outline-primary" type="submit" id="button-addon">Поиск</button>
+                </div>
+            </form>
+</div>
+
+<div class="container-fluid">
+  <h3>{{ text }}</h3>
+</div>
+{% for p in projects %}
+<div class="card w-100 my-3 ">
+  <div class="card-header">
+    <div class="row">
+    <div class="col-10">
+
+      <h3 class="mb-0">
+        {% if p.is_approved %}
+        <a  data-bs-toggle="tooltip" data-bs-placement="top"
+                                    data-bs-custom-class="custom-tooltip"
+                                    data-bs-title="This top tooltip is themed via CSS variables."><img src="{% static 'main\images\ok.svg' %}" alt="is_approved" height="50px"></a>
+        {% endif %}
+    {{ p.name_of_project }}
+    </h3>
+       {% if p.is_approved %}
+            <p class="text text-primary my-0"><i>проект с проверенным менеджером</i></p>
+            {% endif %}
+    </div>
+    <div class="col">
+      <p class="text text-end"><i>
+        {{p.date_create}}</i>
+      </p>
+    </div>
+</div>
+  </div>
+  <img src=" {{ p.poster.url }} " class="card-img-top" alt="{{ p.poster.url }}" height="400em" style="object-fit:cover">
+  <div class="card-body">
+    <h4 class="card-title">Тип проекта: {{ p.get_project_type_display }} | Куратор: {{ p.manager.firstname }} {{ p.manager.secondname }}</h4>
+    <h5 class="card-title">{{ p.get_project_status_display }}</h5>
+    <h5 class="card-title">Целевые группы: {{ p.target_groups }}</h5>
+    <p class="card-text">{{ p.short_project_description }}</p>
+    <a href="{% url 'project' p.pk %}" class="btn btn-primary">Страница проекта</a>
+  </div>
+</div>
+
+{% endfor %}
+
+
+
+{% endblock %}

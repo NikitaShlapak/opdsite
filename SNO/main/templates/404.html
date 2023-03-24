@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}Проекты | Error 404 {% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-5">
+  <h2 class="mb-5">{% block heading %}Error 404 | Page not foung{% endblock %}</h2>
+  <h4 class="mb-5">{% block text %} Страница, которую вы пытаетесь найти не существует. Попробуйте ещё раз {% endblock %}</h4>
+  <a href="{% url 'MAIN' %}" role="button" class="btn btn-primary w-25">На главную</a>
+</div>
+{% endblock %}

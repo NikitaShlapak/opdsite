@@ -1,0 +1,52 @@
+{% extends 'main/project_page.html' %}
+
+{% load static %}
+
+{% block title %} Добавление отчёта | Add report {% endblock %}
+
+{% block form %}
+
+<Link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+
+<div class="container-fluid">
+<form id="form" action="{% url 'add_report' p.pk %}" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <div class="mb-3 text fs-5 text-danger">
+      {{ form.non_field_errors }}
+  </div>
+  <div class="mb-3 row">
+    <div class="col-md-8">
+      <label for="{{ form.heading.id_for_label }}" class="form-label fs-4">{{ form.heading.label }}</label>
+      {{ form.heading }}
+    </div>
+    <div class="col-md-4">
+          <label for="{{ form.author.id_for_label }}" class="form-label fs-4">{{ form.author.label }}</label>
+            {{ form.author }}
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.text.id_for_label }}" class="form-label fs-4">{{ form.text.label }}</label>
+    {{ form.text }}
+  </div>
+  <div class="mb-3 row align-items-end">
+    <div class="col-md-auto">
+      <label for="{{ form.file.id_for_label }}" class="form-label fs-4">{{ form.file.label }}</label>
+      {{ form.file }}
+    </div>
+    <div class="col-md-4 ">
+      <button type="submit" class="btn btn-primary">Опубликовать</button>
+    </div>
+  </div>
+</form>
+</div>
+
+
+
+
+{% endblock %}

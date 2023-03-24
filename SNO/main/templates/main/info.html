@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Информация | Info{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid mb-4">
+    <h2>Содержание</h2>
+    <div class="list-group">
+      <a href="#register1" class="list-group-item list-group-item-action">
+        Регистрация студента (участие в проекте)
+      </a>
+      <a href="#register2" class="list-group-item list-group-item-action">Регисрация студента (курирование проекта)</a>
+      <a href="#register3" class="list-group-item list-group-item-action">Регистрация проекта</a>
+      <a href="#application" class="list-group-item list-group-item-action">Как принять/отклонить заявку на проект?</a>
+      <a href="#report" class="list-group-item list-group-item-action">Прикрепление отчёта</a>
+    </div>
+
+
+</div>
+<div class="container-fluid mb-3" id="register1">
+    <h3>Регистрация студента (участие в проекте)</h3>
+    <hr>
+    <p><b>1. Найдите интересующий вас проект и перейдите на его страницу.</b> Вы можете упростить поиск с помощью фильтров и поиску по учебной группе или фамилии куратора.</p>
+    <img src="{% static 'main/images/info/1.jpg' %}" class="mb-3" height="600px" alt="1">
+    <p><b>2. Нажмите "Подать заявку".</b> Вас перенаправит на страницу регистрации.</p>
+    <img src="{% static 'main/images/info/2.jpg' %}" class="mb-3" height="600px" alt="2">
+    <p><b>3. Заполните поля и подайте заявку.</b></p>
+    <img src="{% static 'main/images/info/3.jpg' %}" class="mb-3" height="600px" alt="3">
+    <p><b>4. Проверьте свою почту.</b>Если вы видите уведомление об успешном заполнении формы, то это значит, что заявка подана успешно. В дальнейшем, когда куратор проекта изменит её статус (примет или отклонит), вы также получите уведомление.</p>
+    <img src="{% static 'main/images/info/4.jpg' %}" height="100px" alt="4">
+</div>
+
+<div class="container-fluid mb-3" id="register2">
+    <h3>Регисрация студента (курирование проекта)</h3>
+    <hr>
+    <p><b>1. В меню сайта слева снизу нажмите на кнопку "Регистрация менеджера".</b></p>
+    <img src="{% static 'main/images/info/5.jpg' %}" class="mb-3" height="600px" alt="5">
+    <p><b>2. Заполните регистрационную форму.</b>Обратите внимание на корректность указания учебной группы и почты.</p>
+    <img src="{% static 'main/images/info/6.jpg' %}" class="mb-3" height="400px" alt="6">
+    <p><b>3. Проверьте свою почту.</b> В случае успешной регистрации вас перенаправит на главную страницу, а на почту придёт уведомление.</p>
+</div>
+
+<div class="container-fluid mb-3" id="register3">
+    <h3>Регистрация проекта</h3>
+    <hr>
+    <p><b>1. В меню сайта слева сверху нажмите на кнопку "Предложить проект".</b></p>
+    <img src="{% static 'main/images/info/7.jpg' %}" class="mb-3" height="600px" alt="5">
+    <p><b>2. Заполните форму.</b> Обратите внимание на корректность указания почты. На неё будут приходить уведомления о новых заявках. В случае успешной регистрации вас перенаправит на главную страницу.</p>
+    <img src="{% static 'main/images/info/8.jpg' %}" class="mb-3" height="600px" alt="6">
+    <p class="text text-danger"><i><b>Обратите внимание</i></b>, что для регистрации проекта необходимо предварительно <a
+            href="#register2" class="link-danger">зарегистрировать его менеджера</a>!</p>
+</div>
+
+<div class="container-fluid mb-3" id="application">
+    <h3>Как принять/отклонить заявку на проект?</h3>
+    <hr>
+    <p><b>1. Проверьте почту, которую указывали при регистрации проекта.</b> Все заявки будут в ветке с темой "Заявки | <Название проекта>"</p>
+    <img src="{% static 'main/images/info/9.jpg' %}" class="mb-3" height="200px" alt="5">
+    <p><b>2. Перейдите по нужной ссылке.</b> <i class="text text-danger"><b>Будьте внимательны!</b> Отменить или изменить это действие будет невозможно.</i>
+        В случае успешного изменения статуса, вы будете перенаправлены на страницу проекта. В ином - вы увидите сообщение об ошибке. </p>
+</div>
+
+<div class="container-fluid mb-3" id="report">
+    <h3>Прикрепление отчёта</h3>
+    <hr>
+    <p><b>1. На странице проектка, <i>набор на который закрыт</i>, Нажмите соответствующую кнопку.</b> </p>
+    <img src="{% static 'main/images/info/10.jpg' %}" class="mb-3" height="600px" alt="5">
+    <p><b>2. Введите название, текст отчёта и выберите автора, <a class="link-danger" href="#register1">входящего в команду проекта.</a></b> Вы также можете прикрепить к отчёту файл с текстом, изображением, презентацией и т.д.</p>
+    <img src="{% static 'main/images/info/11.jpg' %}" class="mb-3" height="600px" alt="5">
+</div>
+
+
+{% endblock %}
