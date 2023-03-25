@@ -1,4 +1,5 @@
 import random
+from datetime import datetime
 
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
@@ -18,7 +19,7 @@ class CustomUser(AbstractUser):
 
     registration_time = models.DateTimeField('Дата регистрации', auto_now_add=True)
 
-    regex = r'([а-яА-ЯёЁ]{1,4}\d?-[1-9а-яА-ЯёЁ]{1,4}\d?)|Преподаватель'
+    regex = r'([а-яА-ЯёЁ]{1,4}\d?-[1-9а-яА-ЯёЁ]{1,4}\d?)|Преподаватель' # 1-4 буквы, затем '-' и 1-4 цифры/буквы ИЛИ "Преподаватель"
     study_group = models.CharField('Группа', max_length=15, blank=True,null=True,default='Преподаватель',
                              validators=[RegexValidator(regex=regex, message='Некорректное название группы')])
 
@@ -103,3 +104,69 @@ class ProjectReport(models.Model):
     class Meta:
         verbose_name = 'Отчёт'
         verbose_name_plural = 'Отчёты'
+
+
+class StudyGroup(models.Model):
+
+    class StudyGroupType(models.TextChoices):
+        AES = 'АЭС', 'АЭС'
+        EIA = 'ЭиА', 'ЭиА'
+        YARM = 'ЯРМ', 'ЯРМ'
+        BIZ = 'БИЗ', 'БИЗ'
+        BIO = 'БИО', 'БИО'
+        IVT = 'ИВТ', 'ИВТ'
+        IS = 'ИС', 'ИС'
+        M = 'М', 'М'
+        MEN = 'МЕН', 'МЕН'
+        MTM = 'МТМ', 'МТМ'
+        MF = 'МФ', 'МФ'
+        TD = 'ТД', 'ТД'
+        TF = 'ТФ', 'ТФ'
+        HIM = 'ХИМ', 'ХИМ'
+        HFM = 'ХФМ', 'ХФМ'
+        EKN = 'ЭКН', 'ЭКН'
+        YAFT = 'ЯФТ', 'ЯФТ'
+        YAET = 'ЯЭТ', 'ЯЭТ'
+
+    type = models.CharField(max_length=5, verbose_name='Тип группы',choices=StudyGroupType.choices)
+
+    class Years(models.TextChoices):
+        FIRST  = "1", "Первый"
+        SECOND = "2", "Второй"
+
+    year = models.CharField(max_length=2, verbose_name='Курс',choices=Years.choices)
+    subgroup = models.SmallIntegerField(default=0, verbose_name='Подгруппа')
+
+    def __str__(self):
+        study_type = {
+            'bachelors': ['БИЗ', 'БИО', 'ИВТ', 'ИС', 'М', 'МЕН', 'МТМ', 'МФ', 'ТД', 'ТФ', 'ХИМ', 'ХФМ', 'ЭКН', 'ЯФТ',
+                          'ЯЭТ'],
+            'specialists': ['АЭС', 'ЛД', 'ЭиА', 'ЯРМ'],
+        }
+        ans = self.type
+        current_date = datetime.today()
+        if current_date.month < 9: #Январь-август (1-8 месяцы) - весенний семестр
+            if self.year == self.Years.FIRST:
+                app = str(current_date.year - 1)[-2:]
+            elif self.year == self.Years.SECOND:
+                app = str(current_date.year - 2)[-2:]
+        else: #Осенний семестр
+            if self.year == self.Years.FIRST:
+                app = str(current_date.year)[-2:]
+            elif self.year == self.Years.SECOND:
+                app = str(current_date.year - 1)[-2:]
+
+        if ans in study_type['bachelors']:
+            if self.subgroup:
+                ans = ans + f"{self.subgroup}-Б{app}"
+            else:
+                ans = ans + f"-Б{app}"
+        elif ans in study_type['specialists']:
+            if self.subgroup:
+                ans = ans + f"{self.subgroup}-C{app}"
+            else:
+                ans = ans + f"-C{app}"
+        return ans
+    class Meta:
+        verbose_name = 'Учебная группа'
+        verbose_name_plural = 'Учебные группы'

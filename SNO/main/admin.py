@@ -28,6 +28,12 @@ class CustomUserAdmin(UserAdmin):
     # search_fields = ('first_name', 'last_name', 'group', 'current_project__name_of_project')
     sortable_by = ('last_name', 'study_group')
 
+class StudyGroupAdmin(admin.ModelAdmin):
+    list_display = ('type', 'subgroup','year')
+    list_display_links = ('type', 'subgroup','year')
+    sortable_by = ('type', 'subgroup','year')
+
+admin.site.register(StudyGroup, StudyGroupAdmin)
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectReport, ProjectReportAdmin)

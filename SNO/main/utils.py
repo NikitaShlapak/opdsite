@@ -1,6 +1,8 @@
 from .forms import SearchForm, SearchNameForm
 from .models import *
 
+
+
 class DataMixin:
 
     def get_user_context(self, **kwargs):
