@@ -27,7 +27,7 @@
         </li>
         {% else %}
         <li>
-            <a href="" class="btn btn-outline-primary mb-1 w-100" role="button">Личный кабинет</a>
+            <a href="{% url 'profile' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Личный кабинет</a>
         </li>
         {% endif %}
         {% if group_form %}

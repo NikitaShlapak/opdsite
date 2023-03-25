@@ -19,6 +19,6 @@ urlpatterns = [
     path('project/<int:pk>/edit/<int:edition_key>', views.ProjectUpdateView.as_view(), name='edit'),
     path('project/<int:project_id>/<int:student_id>/apply', views.confirm_app, name='apply'),
     path('project/<int:project_id>/<int:student_id>/decline', views.decline_app, name='decline'),
-    # path('profile/', views.MainFiltered, name='profile'),
+    path('profile/', views.ProfilePage.as_view(), name='profile'),
 
 ]

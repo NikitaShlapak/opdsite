@@ -32,6 +32,8 @@ def form_title(page='main'):
         title = 'Регистрация | Register'
     if page == 'login':
         title = 'Вход | Login'
+    if page == 'profile':
+        title = 'Личный кабинет | Profile'
     return title
 
 def find_by_group(all_projects=Project.objects.all(), group='group'):

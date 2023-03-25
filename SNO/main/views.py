@@ -1,9 +1,10 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import UpdateView, CreateView, DetailView
+from django.views.generic import UpdateView, CreateView, DetailView, TemplateView
 from django.contrib.auth import logout as django_logout
 
 from .models import *
@@ -416,4 +417,14 @@ def logout(request):
     django_logout(request)
     return redirect('login')
 
-# class ProfilePage(DataMixin, DetailView):
+class ProfilePage(DataMixin, LoginRequiredMixin, TemplateView):
+    template_name = 'main/profile_page.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user']=self.request.user
+        c_def = self.get_user_context(selected='profile')
+        return context|c_def
+
+    def handle_no_permission(self):
+        return redirect('login')
+
