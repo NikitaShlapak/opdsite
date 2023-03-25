@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Регистрация | Register{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block body %}
-<h1>Регистрация</h1>
+<h1>{{ title }}</h1>
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}

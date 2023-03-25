@@ -183,7 +183,7 @@
 
 {% if request.user.is_authenticated %}
         <li>
-            <a href="" class="btn btn-outline-danger mt-1 w-100" role="button">Выйти</a>
+            <a href="{% url 'logout' %}" class="btn btn-outline-danger mt-1 w-100" role="button">Выйти</a>
         </li>
 {% endif %}
 

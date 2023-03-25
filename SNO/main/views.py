@@ -1,10 +1,10 @@
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView
 from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import UpdateView, CreateView
+from django.views.generic import UpdateView, CreateView, DetailView
+from django.contrib.auth import logout as django_logout
 
 from .models import *
 from .forms import *
@@ -390,15 +390,30 @@ class ProjectUpdateView(UpdateView):
         return context
 
 
-class RegisterUser(CreateView):
+class RegisterUser(DataMixin, CreateView):
     form_class = CustomUserCreationForm
-    template_name = "main/register_user.html"
+    template_name = "main/register+login.html"
     success_url = reverse_lazy('login')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(selected='register')
+        return context|c_def
 
-class LoginUser(LoginView):
-    form_class = AuthenticationForm
-    template_name = 'main/login.html'
 
-    def get_success_url(self):
-        return reverse_lazy('MAIN')
+class LoginUser(DataMixin, LoginView):
+    form_class = CustomUserAuthenticationForm
+    template_name = 'main/register+login.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(selected='login')
+        return context|c_def
+    # def get_success_url(self):
+    #     return reverse_lazy('MAIN')
+
+def logout(request):
+    django_logout(request)
+    return redirect('login')
+
+# class ProfilePage(DataMixin, DetailView):

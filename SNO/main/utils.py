@@ -1,4 +1,16 @@
+from .forms import SearchForm, SearchNameForm
 from .models import *
+
+class DataMixin:
+
+    def get_user_context(self, **kwargs):
+        context = kwargs
+        context['group_form'] = SearchForm()
+        context['name_form'] = SearchNameForm()
+        if 'selected' not in context:
+            context['selected'] = 'all'
+        context['title'] = form_title(context['selected'])
+        return context
 
 def form_title(page='main'):
     title = 'Главная | Main'
@@ -16,6 +28,10 @@ def form_title(page='main'):
         title = 'Сервисные | Service'
     if page =='research':
         title = 'Исследовательские | Research'
+    if page == 'register':
+        title = 'Регистрация | Register'
+    if page == 'login':
+        title = 'Вход | Login'
     return title
 
 def find_by_group(all_projects=Project.objects.all(), group='group'):
