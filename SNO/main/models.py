@@ -19,9 +19,10 @@ class CustomUser(AbstractUser):
 
     registration_time = models.DateTimeField('Дата регистрации', auto_now_add=True)
 
-    regex = r'([а-яА-ЯёЁ]{1,4}\d?-[1-9а-яА-ЯёЁ]{1,4}\d?)|Преподаватель' # 1-4 буквы, затем '-' и 1-4 цифры/буквы ИЛИ "Преподаватель"
-    study_group = models.CharField('Группа', max_length=15, blank=True,null=True,default='Преподаватель',
-                             validators=[RegexValidator(regex=regex, message='Некорректное название группы')])
+    # regex = r'([а-яА-ЯёЁ]{1,4}\d?-[1-9а-яА-ЯёЁ]{1,4}\d?)|Преподаватель' # 1-4 буквы, затем '-' и 1-4 цифры/буквы ИЛИ "Преподаватель"
+    # study_group = models.CharField('Группа', max_length=15, blank=True,null=True,default='Преподаватель',
+    #                          validators=[RegexValidator(regex=regex, message='Некорректное название группы')])
+    study_group = models.ForeignKey('StudyGroup',verbose_name='Група', on_delete=models.SET_NULL, null=True)
 
     is_approved = models.BooleanField(default=False)
     is_Free = models.BooleanField(default=True)
@@ -107,6 +108,7 @@ class ProjectReport(models.Model):
 
 
 class StudyGroup(models.Model):
+    related_teacher = models.ForeignKey(CustomUser, verbose_name='Преподаватель', on_delete=models.SET_NULL, null=True)
 
     class StudyGroupType(models.TextChoices):
         AES = 'АЭС', 'АЭС'
@@ -127,14 +129,12 @@ class StudyGroup(models.Model):
         EKN = 'ЭКН', 'ЭКН'
         YAFT = 'ЯФТ', 'ЯФТ'
         YAET = 'ЯЭТ', 'ЯЭТ'
+        TEACHER = 'Преподаватель', 'Преподаватель'
 
-    type = models.CharField(max_length=5, verbose_name='Тип группы',choices=StudyGroupType.choices)
+    type = models.CharField(max_length=15, verbose_name='Тип группы',choices=StudyGroupType.choices)
 
-    class Years(models.TextChoices):
-        FIRST  = "1", "Первый"
-        SECOND = "2", "Второй"
 
-    year = models.CharField(max_length=2, verbose_name='Курс',choices=Years.choices)
+    year = models.SmallIntegerField(verbose_name='год поступления', default=datetime.today().year)
     subgroup = models.SmallIntegerField(default=0, verbose_name='Подгруппа')
 
     def __str__(self):
@@ -144,28 +144,17 @@ class StudyGroup(models.Model):
             'specialists': ['АЭС', 'ЛД', 'ЭиА', 'ЯРМ'],
         }
         ans = self.type
-        current_date = datetime.today()
-        if current_date.month < 9: #Январь-август (1-8 месяцы) - весенний семестр
-            if self.year == self.Years.FIRST:
-                app = str(current_date.year - 1)[-2:]
-            elif self.year == self.Years.SECOND:
-                app = str(current_date.year - 2)[-2:]
-        else: #Осенний семестр
-            if self.year == self.Years.FIRST:
-                app = str(current_date.year)[-2:]
-            elif self.year == self.Years.SECOND:
-                app = str(current_date.year - 1)[-2:]
 
         if ans in study_type['bachelors']:
             if self.subgroup:
-                ans = ans + f"{self.subgroup}-Б{app}"
+                ans = ans + f"{self.subgroup}-Б{self.year%1000}"
             else:
-                ans = ans + f"-Б{app}"
+                ans = ans + f"-Б{self.year%1000}"
         elif ans in study_type['specialists']:
             if self.subgroup:
-                ans = ans + f"{self.subgroup}-C{app}"
+                ans = ans + f"{self.subgroup}-C{self.year%1000}"
             else:
-                ans = ans + f"-C{app}"
+                ans = ans + f"-C{self.year%1000}"
         return ans
     class Meta:
         verbose_name = 'Учебная группа'

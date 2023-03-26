@@ -6,7 +6,9 @@
 {% block body %}
 <h1>{{ title }}</h1>
 
-Profile page
+{{ user.username }} profile page
+
+<h3>Группа: {{ user.study_group }}</h3>
 
 {{ user }}
 {% endblock %}
