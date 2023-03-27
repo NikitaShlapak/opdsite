@@ -161,17 +161,17 @@ def AddProject(request):
         form = ProjectForm(request.POST, request.FILES)
         if form.is_valid():
             if len(form.cleaned_data['long_project_description']) > len(form.cleaned_data['short_project_description']):
-                if (form.cleaned_data['manager'].current_project):
-                    form.add_error(None,
-                                   'Этот студент не может быть менеджером проекта, так как уже подал заявку в другой '
-                                   'или является менеджером')
-                else:
+                # if (form.cleaned_data['manager'].current_project):
+                #     form.add_error(None,
+                #                    'Этот студент не может быть менеджером проекта, так как уже подал заявку в другой '
+                #                    'или является менеджером')
+                # else:
                     try:
                         pr = Project.objects.create(edition_key=generate_edition_key(),**form.cleaned_data)
-                        form.cleaned_data['manager'].current_project = pr
-                        form.cleaned_data['manager'].is_free = False
-                        form.cleaned_data['manager'].save()
-                        return redirect('MAIN')
+                        # form.cleaned_data['manager'].current_project = pr
+                        # form.cleaned_data['manager'].is_free = False
+                        # form.cleaned_data['manager'].save()
+                        # return redirect('MAIN')
                     except:
                         form.add_error(None, 'Ошибка регистрации проекта')
             else:
