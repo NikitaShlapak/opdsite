@@ -260,7 +260,7 @@ def ExpandTeam(request, project_id):
     if request.method == 'POST':
         form = TeamMemberForm(request.POST)
         if form.is_valid():
-            try:
+            # try:
                 data = form.cleaned_data
                 data['current_project'] = project
                 data['state'] = TeamMember.State.OBSERVED
@@ -287,8 +287,8 @@ def ExpandTeam(request, project_id):
                     fail_silently=False,
                 )
                 return render(request, 'main/reg_success.html')
-            except:
-                form.add_error(None, 'Ошибка регистрации пользователя')
+            # except:
+            #     form.add_error(None, 'Ошибка регистрации пользователя')
     else:
         form = TeamMemberForm()
     group_form = SearchForm()
