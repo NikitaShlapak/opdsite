@@ -109,6 +109,7 @@ def ProjectPage(request, project_id):
     team = project.team.all()
     group_form = SearchForm()
     reject_form = ProjectRejectForm()
+    desc = project.long_project_description.split('\n')
     data = {
         'reject_form': reject_form,
         'group_form': group_form,
@@ -116,6 +117,7 @@ def ProjectPage(request, project_id):
         'team': team,
         'selected': project.project_type,
         'verification_form':ProjectConfirmationForm(),
+        'desc':desc
     }
     data['title'] = form_title(data['selected'])
     return render(request, 'main/project_page.html', data)
