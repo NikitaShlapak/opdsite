@@ -40,7 +40,9 @@
       <h3 class="card-title">Куратор: {{ p.manager.firstname }} {{ p.manager.secondname }}</h3>
       <h5 class="card-title">Целевые группы: {{ p.target_groups }}</h5>
       <h5 class="card-title">{{ p.get_project_status_display }}</h5>
-      <p class="card-text">{{ p.long_project_description }}</p>
+      {% for par in desc %}
+      <p class="card-text">{{ par }}</p>
+      {% endfor %}
 
       {% if p.project_status == 'opened' %}
 
