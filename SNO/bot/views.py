@@ -1,3 +1,9 @@
 from django.shortcuts import render
+from django.views.generic import TemplateView
 
-# Create your views here.
+
+
+class BotManageView(TemplateView):
+    template_name = 'bot/bot_index.html'
+
+    #Bot = SNO_VK_BOT()

@@ -24,3 +24,4 @@ class ProjectReportAdmin(admin.ModelAdmin):
 admin.site.register(TeamMember, TeamMemberAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectReport, ProjectReportAdmin)
+
