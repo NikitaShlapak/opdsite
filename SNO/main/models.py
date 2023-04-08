@@ -2,7 +2,7 @@ import random
 from datetime import datetime
 
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator
+
 from django.db import models
 from django.urls import reverse
 
@@ -20,13 +20,14 @@ class CustomUser(AbstractUser):
 
     registration_time = models.DateTimeField('Дата регистрации', auto_now_add=True)
 
-    # regex = r'([а-яА-ЯёЁ]{1,4}\d?-[1-9а-яА-ЯёЁ]{1,4}\d?)|Преподаватель' # 1-4 буквы, затем '-' и 1-4 цифры/буквы ИЛИ "Преподаватель"
-    # study_group = models.CharField('Группа', max_length=15, blank=True,null=True,default='Преподаватель',
-    #                          validators=[RegexValidator(regex=regex, message='Некорректное название группы')])
-    study_group = models.ForeignKey('StudyGroup',verbose_name='Група', on_delete=models.SET_NULL, null=True)
+
+    study_group = models.ForeignKey('StudyGroup',verbose_name='Група', on_delete=models.SET_NULL, default='StudyGroup.StudyGroupType.TEACHER', null=True)
 
     is_approved = models.BooleanField(default=False)
     is_Free = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.get_full_name()} ({self.study_group})"
 
 
 
@@ -79,7 +80,7 @@ class Project(models.Model):
 
 
     def is_approved(self):
-        return self.manager.is_approved
+        return self.manager.is_approved or self.manager.is_staff
 
     def get_all_target_group_types(self):
         res = []
@@ -96,6 +97,9 @@ class Project(models.Model):
 class Applications(models.Model):
     user =  models.ForeignKey(CustomUser, verbose_name='Пользователь', on_delete=models.CASCADE)
     project = models.ForeignKey(Project, verbose_name='Проект', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.user}'s application to {self.project.name_of_project}"
 
     class Meta:
         verbose_name = 'Заявка'
@@ -146,7 +150,7 @@ class StudyGroup(models.Model):
         YAET = 'ЯЭТ', 'ЯЭТ'
         TEACHER = 'Преподаватель', 'Преподаватель'
 
-    type = models.CharField(max_length=15, verbose_name='Тип группы',choices=StudyGroupType.choices)
+    type = models.CharField(max_length=15, verbose_name='Тип группы',choices=StudyGroupType.choices, default=StudyGroupType.TEACHER)
 
 
     year = models.SmallIntegerField(verbose_name='год поступления', default=datetime.today().year)

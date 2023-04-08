@@ -6,168 +6,148 @@
 
 {% block body %}
 
-
-<div class="card w-100 my-2 ">
-  <div class="card-header">
-      <div class="row py-1 ">
-        <div class="col">
-
-            <h3>{% if p.is_approved %}
-                <img src="{% static 'main\images\ok.svg' %}" alt="is_approved" height="50px">
-            {% endif %}
-            {{ p.name_of_project }}</h3>
-            {% if p.is_approved %}
-            <p class="text text-primary my-0"><i>проект с проверенным менеджером</i></p>
-            {% endif %}
-            {% if request.user.is_staff %}
-            <p>Ключ безопасности: {{ p.edition_key }}</p>
-            {% endif %}
-        </div>
-
-        <div class="col-auto">
-            <a role="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#changeConfirmModal">Редактировать</a>
-            {% if request.user.is_staff and p.project_status == 'under_review' or p.project_status == 'rejected' %}
-            <br>
-            <a role="button" class="btn btn-danger w-100 mt-2" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">Отклонить</a>
-            {% endif %}
-
-        </div>
-      </div>
-  </div>
-  <h3 class="card-title px-2">Тип проекта: {{ p.get_project_type_display }} </h3>
-  <img src=" {{ p.poster.url }} " class="card-img-top" alt="{{ p.poster.url }}" height="400px"style="object-fit:cover">
-  <div class="card-body">
-      <h3 class="card-title">Куратор: {{ p.manager.firstname }} {{ p.manager.secondname }}</h3>
-      <h5 class="card-title">Учебные группы исполнителей: {% for gr in p.target_groups.all %}{{ gr.type }} {% endfor %}</h5>
-      <h5 class="card-title">{{ p.get_project_status_display }}</h5>
-      {% for line in desc %}
-      <p class="card-text">{{ line }}</p>
-      {% endfor %}
-
-      {% if p.project_status == 'opened' %}
-
-        <a href="{% url 'expand' p.pk %}" class="btn btn-primary">Подать заявку</a>
-
-      {% elif p.project_status == 'closed' %}
-      <hr>
-        <h3>Команда проекта:</h3>
-
-      <table class="table table-striped" id="team">
-  <thead>
-    <tr>
-      <th scope="col">Студент</th>
-      <th scope="col">Группа</th>
-      <th scope="col">Email</th>
-      <th scope="col">Статус</th>
-    </tr>
-  </thead>
-  <tbody>
-  {% for one in team %}
-    <tr>
-      <td>{{ one.get_full_name }}</td>
-      <td>{{ one.group }}</td>
-      <td>{{ one.email }}</td>
-      <td>{{ one.get_state_display }}</td>
-    </tr>
-   {% endfor %}
-  </tbody>
-</table>
-
-<hr>
-
-      <h3 class="text">Отчёты:</h3>
-      <a href="{% url 'add_report' p.pk %}#form" class="btn btn-primary" role="button">Добавить отчёт</a>
-
-
-
-      {% for r in p.projectreport_set.all %}
-
-      <div class="card my-3">
-          <div class="card-header">
-              <div class="row">
-                  <div class="col-6">
-                      <h5 class="text text-start">
-                      {{ r.author }}
-                      </h5>
-                  </div>
-                  <div class="col-6">
-                      <h5 class="text text-end">
-                      {{ r.publishing_time }}
-                      </h5>
+{% if p.manager == request.user or request.user.is_staff %}
+<div class="row">
+    <div class="col-9">
+{% endif %}
+            <div class="card">
+              <div class="card-header">
+                  <div class="row py-1 ">
+                    <div class="col">
+                        <h3>{% if p.is_approved %}
+                                <img src="{% static 'main\images\ok.svg' %}" alt="is_approved" height="50px">
+                            {% endif %}
+                            {{ p.name_of_project }}
+                        </h3>
+                        {% if p.is_approved %}
+                            <p class="text text-primary my-0"><i>Проект с проверенным менеджером</i></p>
+                        {% endif %}
+                    </div>
                   </div>
               </div>
-          </div>
-          <div class="card-body">
-             <h4>{{ r.heading }}</h4>
-              <hr>
-              <p>{{ r.text }}</p>
-          </div>
-          {% if r.file %}
-          <div class="card-footer">
-              <a href="{{ r.file.url }}" class="d-flex text-decoration-none align-items-center">
-                  <img src="{% static 'main\images\logos\file_icon.svg' %}" alt="" height="50" width="50">
-                  <span class="text text-dark fs-4">Прикреплённый файл</span>
-              </a>
-          </div>
+              <h3 class="card-title px-2">Тип проекта: {{ p.get_project_type_display }} </h3>
+              <img src="{{ p.poster.url }}"  alt="{{ p.poster.url }}" height="400px"style="object-fit:cover">
+              <div class="card-body">
+                  <h3 class="card-title">Куратор: {{ p.manager.get_full_name }}</h3>
+                  <h5 class="card-title">Учебные группы исполнителей: {{ p.get_all_target_group_types }}</h5>
+                  <h5 class="card-title">{{ p.get_project_status_display }}</h5>
+                  {% for line in desc %}
+                    <p class="card-text">{{ line }}</p>
+                  {% endfor %}
 
-          {% endif %}
-      </div>
+                  {% if p.project_status == 'opened' %}
+                    {% if not request.user == p.manager and not request.user in p.team.all %}
+                        <a href="{% url 'expand' p.pk %}" class="btn btn-primary">Подать заявку</a>
+                    {% else %}
+                        <a href="" class="btn btn-primary disabled">Подать заявку</a>
+                    {% endif %}
+                  {% elif p.project_status == 'closed' %}
+                      <hr>
+                      <h3>Команда проекта:</h3>
+                      <table class="table table-striped" id="team">
+                          <thead>
+                            <tr>
+                              <th scope="col">Студент</th>
+                              <th scope="col">Группа</th>
+                              <th scope="col">Email</th>
+                              <th scope="col">Статус</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                          {% for one in team %}
+                            <tr>
+                              <td>{{ one.get_full_name }}</td>
+                              <td>{{ one.group }}</td>
+                              <td>{{ one.email }}</td>
+                              <td>{{ one.get_state_display }}</td>
+                            </tr>
+                           {% endfor %}
+                          </tbody>
+                      </table>
+                      <hr>
+                      <h3 class="text">Отчёты:</h3>
+                      <a href="{% url 'add_report' p.pk %}#form" class="btn btn-primary" role="button">Добавить отчёт</a>
 
-
-
-      {% endfor %}
-
-      {% endif %}
-
-  </div>
-</div>
-
-<!-- Edit verification modal -->
-<div class="modal fade" id="changeConfirmModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="loginModalLabel">Введите ключ безопасности</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-
-      <form action="{% url 'verify_edition' p.pk %}" method="post">
-        {% csrf_token %}
-        <div class="container w-100 py-3">
-            {% if request.user.is_staff %}
-            <p><i>Ключ безопасности: </i><b> {{ p.edition_key }}</b></p>
-            {% endif %}
-            <hr>
-          {% for field in verification_form %}
-          <div class="row my-1 align-items-center">
-            <div class="col-4">
-              <label for="{{ field.id_for_label }}" class="form-label">
-                {{ field.label }}:    </label>
+                      {% for r in p.projectreport_set.all %}
+                      <div class="card my-3">
+                          <div class="card-header">
+                              <div class="row">
+                                  <div class="col-6">
+                                      <h5 class="text text-start">
+                                      {{ r.author }}
+                                      </h5>
+                                  </div>
+                                  <div class="col-6">
+                                      <h5 class="text text-end">
+                                      {{ r.publishing_time }}
+                                      </h5>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="card-body">
+                             <h4>{{ r.heading }}</h4>
+                              <hr>
+                              <p>{{ r.text }}</p>
+                          </div>
+                          {% if r.file %}
+                          <div class="card-footer">
+                              <a href="{{ r.file.url }}" class="d-flex text-decoration-none align-items-center">
+                                  <img src="{% static 'main\images\logos\file_icon.svg' %}" alt="" height="50" width="50">
+                                  <span class="text text-dark fs-4">Прикреплённый файл</span>
+                              </a>
+                          </div>
+                          {% endif %}
+                      </div>
+                      {% endfor %}
+                  {% endif %}
+              </div>
             </div>
-            <div class="col-8">
-              {{ field }}
-            </div>
-          </div>
-          <div class="form-text row text-danger">{{ field.errors }}</div>
 
-          {% endfor %}
-
-        </div>
-
-
-
-
-        <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-        <button type="submit" class="btn btn-primary">Подтвердить</button>
-      </div>
-      </form>
+{% if p.manager == request.user or request.user.is_staff %}
     </div>
-  </div>
+    <div class="col-3">
+        <div class="card sticky-top">
+            <div class="card-header">
+                <h4>Панель управления</h4>
+            </div>
+            <div class="card-body p-1">
+                <div class="border border-2 rounded-2 px-2 py-1">
+                    <h5>Управление проектом:</h5>
+
+                    <a href="{% url 'edit' p.pk p.edition_key %}" role="button" class="btn btn-primary w-100 mt-2">Редактировать</a>
+                    {% if request.user.is_staff and p.project_status == 'under_review' or p.project_status == 'rejected' or request.user.is_superuser %}
+                    <br>
+                    <a role="button" class="btn btn-danger w-100 mt-2" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">Отклонить</a>
+                    {% endif %}
+                </div>
+                {% if applyies %}
+                    <div class="border border-2 rounded-2 px-2 py-1 mt-2">
+                        <h5>Заявки:</h5>
+                        {% for ap in applyies %}
+                        <hr class="my-0">
+                            <div class="row px-1">
+                                <div class="col border-end pt-2">
+                                    <a href="" class="align-middle text-decoration-none ">{{ap.user}}</a>
+                                </div>
+                                <div class="col-auto border-end px-1">
+                                    <a href="{% url 'apply_or_decline' ap.pk 'confirm' %}">
+                                        <img src="{% static 'main\images\confirm.svg' %}" alt="confirm" height="45px" >
+                                    </a>
+                                </div>
+                                <div class="col-auto ps-1 pe-2 ">
+                                    <a href="{% url 'apply_or_decline' ap.pk 'delete' %}">
+                                        <img src="{% static 'main\images\decline.svg' %}" alt="decline" height="45px">
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
-
-
+{% endif %}
 
 
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -178,14 +158,9 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-
       <form action="{% url 'verify_delete' p.pk %}" method="post">
         {% csrf_token %}
         <div class="container w-100 py-2">
-            {% if request.user.is_staff %}
-            <p><i>Ключ безопасности: </i><b> {{ p.edition_key }}</b></p>
-            {% endif %}
-            <hr>
           {% for field in reject_form %}
           <div class="row my-1 align-items-center">
             <div class="col-4">
@@ -201,10 +176,6 @@
           {% endfor %}
 
         </div>
-
-
-
-
         <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
         <button type="submit" class="btn btn-danger">Подтвердить</button>
@@ -214,9 +185,5 @@
   </div>
 </div>
 {% block form %}{% endblock %}
-<script>
 
-    console.log(document.querySelector('.card-img-top').clientWidth, document.querySelector('.card-img-top').clientHeight)
-
-</script>
 {% endblock %}

@@ -19,14 +19,14 @@
       <img width="100%" height="100%" src="{% static 'main\images\logos\logo.png' %}" alt="logo" >
     </a>
 
-    <ul class="nav nav-pills flex-column mb-auto">
+    <ul class="nav nav-pills flex-column mb-auto sticky-top ">
         {% if not request.user.is_authenticated %}
-        <li>
+        <li class="mt-2">
             <a href="{% url 'login' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Войти</a>
             <a href="{% url 'register' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Зарегистрироваться</a>
         </li>
         {% else %}
-        <li>
+        <li class="mt-2">
             {% if selected != 'profile' %}
         <a href="{% url 'profile' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Личный кабинет</a>
             {% else %}

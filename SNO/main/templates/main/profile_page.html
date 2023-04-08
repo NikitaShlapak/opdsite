@@ -12,6 +12,46 @@
 
 {{ user }}
 
+{% if my_applies or managed_applies or managed_projects or projects %}
+{% if my_applies %}
+  <h1>Мои заявки:</h1>
+  {% for ap in my_applies %}
+    <div class="card p-2 my-2">
+      <div class="row">
+        <div class="col">
+          <a href="{% url 'project' ap.project.pk %}" class="card-text text text-dark" style="text-decoration:none">{{ ap.project }}</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'apply_or_decline' ap.pk 'delete' %}" class="btn btn-danger">Отозвать заявку</a>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+{% endif %}
+
+{% if managed_applies %}
+  <h1>Заявки на мои проекты:</h1>
+  {% for ap in managed_applies %}
+   <div class="card p-2 my-2">
+      <div class="row">
+        <div class="col">
+          <p class="card-text text text-dark" style="text-decoration:none">
+
+            <a href="{% url 'project' ap.project.pk %}" >{{ ap.project }}</a> |
+            <a href="" >{{ ap.user }} </a>
+          </p>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'apply_or_decline' ap.pk 'confirm' %}" class="btn btn-success">Принять заявку</a>
+          <a href="{% url 'apply_or_decline' ap.pk 'delete' %}" class="btn btn-danger">Отклонить заявку</a>
+          <!-- TODO insert links -->
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+{% endif %}
+
+
 {% if managed_projects %}
   <h1>Проекты под мои управлением:</h1>
   {% for p in managed_projects %}
@@ -21,17 +61,21 @@
 
 
 
-
-<h1>Мои проекты:</h1>
-
-
-
-
-{% for p in projects %}
-{% include 'project_card.html' %}
-{% endfor %}
+{% if projects %}
+  <h1>Мои проекты:</h1>
+  {% for p in projects %}
+    {% include 'project_card.html' %}
+  {% endfor %}
+{% endif %}
 
 
+{% else %}
+<h3>Добро пожаловать, {{ user.get_full_name }}!</h3>
+<p>Кажется, вы только что зарегистрировались. Давайте поищем проекты <i><a href="">специально для вас</a>!</i> Или вы всегда можете <i><a
+        href="">создать свой собственный проект</a>!</i></p><!-- TODO: insert links -->
+<hr>
+<p> Впрочем, можете не спешить - от пересдачи по ОПД ещё никто не умирал, хотя отчислиться вполне можно.</p>
+{% endif %}
 
 
 {% endblock %}

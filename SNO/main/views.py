@@ -1,6 +1,8 @@
+import logging
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.core.mail import send_mail
+from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
@@ -13,6 +15,9 @@ from .models import *
 from .forms import *
 from .utils import *
 from SNO.env import EMAIL_HOST_USER
+
+logging.basicConfig(level=logging.INFO, filename="main_views.log",filemode="a",
+                    format="%(asctime)s %(levelname)s %(message)s")
 
 
 def page_not_found_view(request, exception):
@@ -102,25 +107,20 @@ def MainFiltered(request, type):
 
 
 
+class ProjectView(DataMixin, DetailView):
+    template_name = 'main/project_page.html'
+    model = Project
+    pk_url_kwarg = 'project_id'
+    context_object_name = 'p'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(selected=context['p'].project_type,
+                                      desc=context['p'].long_project_description.split('\n'),
+                                      reject_form=ProjectRejectForm(),
+                                      applyies=Applications.objects.filter(project__pk=context['p'].pk).order_by('-pk'))
+        context['user'] = self.request.user
+        return context | c_def
 
-def ProjectPage(request, project_id):
-    project = Project.objects.get(pk=project_id)
-    # get_object_or_404(project)
-    team = project.team.all()
-    group_form = SearchForm()
-    reject_form = ProjectRejectForm()
-    desc = project.long_project_description.split('\n')
-    data = {
-        'reject_form': reject_form,
-        'group_form': group_form,
-        'p': project,
-        'team': team,
-        'selected': project.project_type,
-        'verification_form':ProjectConfirmationForm(),
-        'desc':desc
-    }
-    data['title'] = form_title(data['selected'])
-    return render(request, 'main/project_page.html', data)
 
 
 def AddReport(request, project_id):
@@ -229,46 +229,54 @@ def AddTeamMember(request):
     return render(request, 'main/add_user.html', context=data)
 
 
-def confirm_app(request, student_id, project_id):
-    student = CustomUser.objects.get(pk=student_id)
-    project = Project.objects.get(pk=project_id)
-    if student.current_project.pk == project_id:
-        try:
+class ConfirmOrDeclineApplication(DataMixin,LoginRequiredMixin,TemplateView):
+    def handle_no_permission(self):
+        return redirect('login')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user']=self.request.user
 
-            student.is_free = False
-            student.save()
-            send_mail(
-                'Изменение статуса участника',
-                f"Ваш статус в проекте {project.name_of_project} изменён: вы приняты в команду.",
-                EMAIL_HOST_USER,
-                [student.email],
-                fail_silently=True,
-            )
-        except:
-            return HttpResponse('Ошибка изменения базы данных')
-    else:
-        return HttpResponse('Студент не подавал заявки на этот проект или её состояние уже изменено')
-    return redirect('project', project_id=project_id)
+        c_def = self.get_user_context()
+        return context|c_def
+    def get(self, request, **kwargs):
+        app = get_object_or_404(Applications, pk=kwargs['app_id'])
+        manager = request.user
+        if app.project.manager == manager or (kwargs['action'] == 'delete' and app.user==manager) or manager.is_superuser:
+            letter_context = {
+                'title': f"Изменение статуса заявки на проект {app.project.name_of_project}",
+            }
+            if kwargs['action'] == 'confirm':
+                try:
+                    app.project.team.add(app.user)
+                    app.project.save()
+                    logging.info(f"Succefully added {app.user} to {app.project} team")
+                except:
+                    logging.error(f"Can not add {app.user} to {app.project} team")
+                else:
+                    letter_context['text']=f"Ваша заявка принята!\nПоздравляем, теперь вы в команде проекта {app.project}!\nСтраница проекта:".split('\n') #TODO: add link to project
+                    app.user.email_user(subject=f"Изменение статуса заявки ", message=f'test',
+                               html_message=render_to_string(request=request, template_name='letter_base.html', context=letter_context))
+                    app.delete()
 
-
-def decline_app(request, student_id, project_id):
-    student = CustomUser.objects.get(pk=student_id)
-    project = Project.objects.get(pk=project_id)
-    if student.current_project.pk == project_id:
-        try:
-            student.save()
-            send_mail(
-                'Изменение статуса участника',
-                f"Ваш статус в проекте {project.name_of_project} изменён: ваша заявка отклонена менеджером.",
-                EMAIL_HOST_USER,
-                [student.email],
-                fail_silently=True,
-            )
-        except:
-            return HttpResponse('Ошибка изменения базы данных')
-    else:
-        return HttpResponse('Студент не подавал заявки на этот проект или её состояние уже изменено')
-    return redirect('project', project_id=project_id)
+            elif kwargs['action'] == 'delete':
+                reclaim = (app.user == request.user)
+                try:
+                    app.delete()
+                    logging.info(f"Succefully deleted application: {app}")
+                except:
+                    logging.error(f"Can not deleted application: {app}")
+                else:
+                    if not reclaim:
+                        letter_context[
+                            'text'] = f"Ваша заявка отклонена менеджером!\nК сожалению, ваша заявка на проект {app.project} была отклонена пользователем {manager.username}".split(
+                            '\n')
+                        app.user.email_user(subject=f"Изменение статуса заявки ", message=f'test',
+                                            html_message=render_to_string(request=request, template_name='letter_base.html',
+                                                                          context=letter_context))
+        else:
+            logging.info(f"{manager} tried to fuck YOU! (attempt to {kwargs['action']} an application {app=}")
+            self.handle_no_permission()
+        return redirect('profile')
 
 
 
@@ -289,6 +297,9 @@ class CreateApplication(DataMixin, LoginRequiredMixin, TemplateView):
         project = Project.objects.get(pk=kwargs['project_id'])
         context = self.get_context_data(selected=project.project_type,project=project)
 
+        # if request.user in project.team.all():
+        #     return
+
         app, context['created'] = Applications.objects.get_or_create(project=context['project'],user=request.user)
 
         app.save()
@@ -304,58 +315,12 @@ class CreateApplication(DataMixin, LoginRequiredMixin, TemplateView):
             }
             project.manager.email_user(subject=f"Заявки на проект {project.name_of_project}", message=f'test',
                                    html_message=render_to_string(request=request, template_name='letter_base.html', context=letter_context))
+            logging.info(f'Application created. User: {request.user}, Project: {project.name_of_project}')
 
         return render(request, self.template_name, context=context)
 
 
 
-
-def ExpandTeam(request, project_id):
-    project = Project.objects.get(pk=project_id)
-    if request.method == 'POST':
-        form = TeamMemberForm(request.POST)
-        if form.is_valid():
-            try:
-                data = form.cleaned_data
-                data['current_project'] = project
-                data['state'] = CustomUser.State.OBSERVED
-                student = CustomUser.objects.create(**data)
-                send_mail(
-                    'Заявка на проект подана успешно',
-                    f"Вы успешно подали заявку на проект {project.name_of_project}. Вы получите уведомление о её принятии или отклонении менеджером.",
-                    EMAIL_HOST_USER,
-                    [data['email']],
-                    fail_silently=True,
-                )
-                msg = f'''На ваш проект {project.name_of_project} подали заявку.
-                        Информация о студенте:
-                        {data['secondname']} {data['firstname']}, группа {data['group']}.
-                        Перейдите по соотвествующей ссылке, чтобы принять или отклонить заявку:
-                        Принять - http://opd.iate.obninsk.ru/project/{project.pk}/{student.pk}/apply
-                        Отклонить - http://opd.iate.obninsk.ru/project/{project.pk}/{student.pk}/decline
-                        Почта для связи: {data['email']}'''
-                send_mail(
-                    f'Заявки | {project.name_of_project}',
-                    msg,
-                    EMAIL_HOST_USER,
-                    [project.manager_email],
-                    fail_silently=False,
-                )
-                return render(request, 'main/reg_success.html')
-            except:
-                form.add_error(None, 'Ошибка регистрации пользователя')
-    else:
-        form = TeamMemberForm()
-    group_form = SearchForm()
-    data = {
-        'group_form': group_form,
-        'p': project,
-        'url': 'expand',
-        'selected': 'reg',
-        'form': form
-    }
-    data['title'] = form_title(data['selected'])
-    return render(request, 'main/add_user.html', context=data)
 
 def verify_edition(request, project_id):
     project = Project.objects.get(pk=project_id)
@@ -383,7 +348,7 @@ def verify_edition(request, project_id):
     return render(request, 'main/edit_project.html', context=data)
 
 
-def reject_project(request, project_id):
+def reject_project(request, project_id): #TODO refactor to class
     project = Project.objects.get(pk=project_id)
     if request.method == 'POST':
         form = ProjectRejectForm(request.POST)
@@ -429,7 +394,7 @@ def reject_project(request, project_id):
 
 
 
-class ProjectUpdateView(UpdateView):
+class ProjectUpdateView(UpdateView): #TODO: hard refactor
     model = Project
     template_name = "main/edit_project.html"
 
@@ -477,6 +442,15 @@ class ProfilePage(DataMixin, LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user']=self.request.user
+        context['projects']=self.request.user.project_set.all()
+        context['my_applies'] = Applications.objects.filter(user=self.request.user)
+        my_projects = Project.objects.filter(manager=self.request.user)
+        my_project_ids=[]
+        for project in my_projects:
+            my_project_ids.append(project.pk)
+        # print(my_project_ids)
+        context['managed_applies'] = Applications.objects.filter(project__pk__in=my_project_ids).order_by('-pk')
+        # print(len(context['managed_applies']))
 
         c_def = self.get_user_context(selected='profile')
         return context|c_def

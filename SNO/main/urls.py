@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
-from .views import RegisterUser
+from .views import RegisterUser, ConfirmOrDeclineApplication, LoginUser, ProfilePage, ProjectUpdateView, \
+    CreateApplication, ProjectView
 
 urlpatterns = [
     path('', views.Main, name='MAIN'),
@@ -9,18 +10,22 @@ urlpatterns = [
     path('info/', views.Info, name='info'),
 
     path('register/', RegisterUser.as_view(), name='register'),
-    path('login/', views.LoginUser.as_view(), name='login'),
+    path('login/', LoginUser.as_view(), name='login'),
     path('logout/', views.logout, name='logout'),
-    path('accounts/profile/', views.ProfilePage.as_view(), name='profile'),
+    path('accounts/profile/', ProfilePage.as_view(), name='profile'),
+    #path('accounts/user/<int:user_id>', UserPage.as_view(), name='user'), TODO: add UserPage class
 
-    path('project/<int:project_id>/', views.ProjectPage, name='project'),
-    path('project/add', views.AddProject, name='add_project'),
-    path('project/<int:pk>/edit/<int:edition_key>', views.ProjectUpdateView.as_view(), name='edit'),
-    path('project/<int:project_id>/register', views.CreateApplication.as_view(), name='expand'),
+    path('project/<int:project_id>/', ProjectView.as_view(), name='project'),
+    path('project/add', views.AddProject, name='add_project'), #TODO registration crush
+    path('project/<int:pk>/edit/<int:edition_key>', ProjectUpdateView.as_view(), name='edit'),
+    path('project/<int:project_id>/register', CreateApplication.as_view(), name='expand'),
     path('project/<int:project_id>/confirm', views.verify_edition, name='verify_edition'),
     path('project/<int:project_id>/reject', views.reject_project, name='verify_delete'),
-    path('project/<int:project_id>/<int:student_id>/apply', views.confirm_app, name='apply'),
-    path('project/<int:project_id>/<int:student_id>/decline', views.decline_app, name='decline'),
+
+
+
+    path('project/<int:app_id>/<str:action>/', ConfirmOrDeclineApplication.as_view(), name='apply_or_decline'),
+
 
     path('project/<int:project_id>/add_report', views.AddReport, name='add_report'),
 
