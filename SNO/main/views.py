@@ -158,75 +158,35 @@ def AddReport(request, project_id):
     return render(request, 'main/add_coment.html', data)
 
 
-def AddProject(request):
-    # print(request.method)
-    if request.method == 'POST':
-        form = ProjectForm(request.POST, request.FILES)
-        # print(form.is_valid())
-        # print(form.errors)
-        # print(form.cleaned_data)
-        if form.is_valid():
-            # print(form.cleaned_data)
-            if len(form.cleaned_data['long_project_description']) > len(form.cleaned_data['short_project_description']):
-                # if (form.cleaned_data['manager'].current_project):
-                #     form.add_error(None,
-                #                    'Этот студент не может быть менеджером проекта, так как уже подал заявку в другой '
-                #                    'или является менеджером')
-                # else:
-                    try:
-                        groups = form.cleaned_data.pop('target_groups')
-                        pr = Project.objects.create(edition_key=generate_edition_key(),**form.cleaned_data)
-                        print(groups)
-                        # for group in groups:
-                        #     pr.target_groups.add(group)
-                        pr.target_groups.add(groups)
-                        pr.save()
+class ProjectCreationView(DataMixin, LoginRequiredMixin, CreateView):
+    form_class = ProjectCreationForm
+    template_name = "main/add_project.html"
 
-                        return redirect('MAIN')
-                    except:
-                        form.add_error(None, 'Ошибка регистрации проекта')
+    def get_context_data(self,  **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(selected='add')
+        return context|c_def
+
+    def post(self,request, **kwargs):
+        form = ProjectCreationForm(request.POST, request.FILES)
+        if form.is_valid():
+            if len(form.cleaned_data['long_project_description']) > len(form.cleaned_data['short_project_description']):
+                groups = form.cleaned_data.pop('target_groups')
+                try:
+                    pr = Project.objects.create(edition_key=generate_edition_key(),
+                                                manager=request.user,
+                                                **form.cleaned_data)
+                    for group in groups:
+                        pr.target_groups.add(group)
+                    pr.save()
+                    logging.info(f"Successfully created project {pr}. Manager - {request.user}")
+                    return redirect('project', pr.pk)
+                except:
+                    form.add_error(None, 'Ошибка регистрации проекта')
             else:
                 form.add_error(None, 'Длинное описание проекта не может быть короче краткого!')
-    else:
-        form = ProjectForm()
+        return render(request, self.template_name, context={'form':form})
 
-    group_form = SearchForm()
-    data = {
-        'group_form': group_form,
-        'selected': 'add',
-        'form': form
-    }
-    data['title'] = form_title(data['selected'])
-    return render(request, 'main/add_project.html', context=data)
-
-
-def AddTeamMember(request):
-    if request.method == 'POST':
-        form = TeamMemberForm(request.POST)
-        if form.is_valid():
-            try:
-                CustomUser.objects.create(**form.cleaned_data)
-                send_mail(
-                    'Регистрация',
-                    'Вы успешно зарегистрированы на портале iate.projects!',
-                    EMAIL_HOST_USER,
-                    [form.cleaned_data['email']],
-                    fail_silently=True,
-                )
-                return redirect('MAIN')
-            except:
-                form.add_error(None, 'Ошибка регистрации пользователя')
-    else:
-        form = TeamMemberForm()
-    group_form = SearchForm()
-    data = {
-        'group_form': group_form,
-        'selected': 'reg',
-        'url': 'add_user',
-        'form': form
-    }
-    data['title'] = form_title(data['selected'])
-    return render(request, 'main/add_user.html', context=data)
 
 
 class ConfirmOrDeclineApplication(DataMixin,LoginRequiredMixin,TemplateView):

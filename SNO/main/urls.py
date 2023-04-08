@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from .views import RegisterUser, ConfirmOrDeclineApplication, LoginUser, ProfilePage, ProjectUpdateView, \
-    CreateApplication, ProjectView
+    CreateApplication, ProjectView, ProjectCreationView
 
 urlpatterns = [
     path('', views.Main, name='MAIN'),
@@ -16,7 +16,7 @@ urlpatterns = [
     #path('accounts/user/<int:user_id>', UserPage.as_view(), name='user'), TODO: add UserPage class
 
     path('project/<int:project_id>/', ProjectView.as_view(), name='project'),
-    path('project/add', views.AddProject, name='add_project'), #TODO registration crush
+    path('project/add', ProjectCreationView.as_view(), name='add_project'),
     path('project/<int:pk>/edit/<int:edition_key>', ProjectUpdateView.as_view(), name='edit'),
     path('project/<int:project_id>/register', CreateApplication.as_view(), name='expand'),
     path('project/<int:project_id>/confirm', views.verify_edition, name='verify_edition'),

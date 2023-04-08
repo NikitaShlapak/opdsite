@@ -62,7 +62,7 @@ class TeamMemberForm(forms.ModelForm):
 
 
 
-class ProjectForm(forms.ModelForm):
+class ProjectCreationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['project_type'].empty_label = 'Укажите тип проекта'
@@ -70,7 +70,7 @@ class ProjectForm(forms.ModelForm):
 
     class Meta:
         model = Project
-        fields = ['name_of_project', 'project_type', 'manager', 'target_groups', 'manager_email',
+        fields = ['name_of_project', 'project_type',  'target_groups',
                   'implementation_period', 'short_project_description', 'long_project_description', 'poster']
         widgets = {
             'name_of_project': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Проект проект"}),
@@ -84,9 +84,9 @@ class ProjectForm(forms.ModelForm):
 
             'project_type': forms.Select(attrs={'class': 'form-control'}),
             'implementation_period': forms.Select(attrs={'class': 'form-control'}),
-            'manager': forms.Select(attrs={'class': 'selectpicker js-states form-control', 'data-live-search': 'true'}),
 
-            'manager_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': "somemail@oiate.ru"}),
+
+
 
         }
 

@@ -46,9 +46,9 @@ class Project(models.Model):
     manager = models.ForeignKey(CustomUser, verbose_name='Руководитель проекта', on_delete=models.CASCADE,
                                 max_length=50, related_name='manager',
                                 limit_choices_to={'is_Free': True})
-    #target_groups = models.CharField('Целевые группы', max_length=100)
+
     target_groups = models.ManyToManyField('StudyGroup', verbose_name='Учебные группы исполнителей')
-    manager_email = models.EmailField('Email руководителя', blank=False)
+
 
     class ImplementationPeriod(models.TextChoices):
         ONESEMESTR = 'One', 'На один семестр'
