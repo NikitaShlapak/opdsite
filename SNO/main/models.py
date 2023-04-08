@@ -10,6 +10,7 @@ from django.urls import reverse
 
 
 class CustomUser(AbstractUser):
+
     username = models.CharField(max_length=50, verbose_name='Имя пользователя', unique=True,
                                 error_messages={'unique': "Пользователь с таким именем уже "
                                                           "зарегистрирован"})
@@ -44,7 +45,8 @@ class Project(models.Model):
     manager = models.ForeignKey(CustomUser, verbose_name='Руководитель проекта', on_delete=models.CASCADE,
                                 max_length=50, related_name='manager',
                                 limit_choices_to={'is_Free': True})
-    target_groups = models.CharField('Целевые группы', max_length=100)
+    #target_groups = models.CharField('Целевые группы', max_length=100)
+    target_groups = models.ManyToManyField('StudyGroup', verbose_name='Учебные группы исполнителей')
     manager_email = models.EmailField('Email руководителя', blank=False)
 
     class ImplementationPeriod(models.TextChoices):
@@ -63,7 +65,7 @@ class Project(models.Model):
 
     project_status = models.CharField(max_length=15, choices=ProjectStatus.choices, default=ProjectStatus.UNDERREVIEW, verbose_name='Статус проекта' )
     team = models.ManyToManyField(CustomUser, verbose_name='Команда', null=True)
-    # applies = models.ManyToManyField(CustomUser, verbose_name='Заявки', null=True)
+
     short_project_description = models.CharField('Краткое описание проекта', max_length=150)
     long_project_description = models.TextField('Полное описание проекта')
     poster = models.ImageField(upload_to='uploads/img/%Y/%m/%d/', verbose_name='Постер')
@@ -79,12 +81,25 @@ class Project(models.Model):
     def is_approved(self):
         return self.manager.is_approved
 
+    def get_all_target_group_types(self):
+        res = []
+        for gr in self.target_groups.all():
+            if not gr.type in res:
+                res.append(gr.type)
+        return ', '.join(res)
+
     class Meta:
         verbose_name = 'Проект'
         verbose_name_plural = 'Проекты'
 
 
+class Applications(models.Model):
+    user =  models.ForeignKey(CustomUser, verbose_name='Пользователь', on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, verbose_name='Проект', on_delete=models.CASCADE)
 
+    class Meta:
+        verbose_name = 'Заявка'
+        verbose_name_plural = 'Заявки'
 
 
 class ProjectReport(models.Model):

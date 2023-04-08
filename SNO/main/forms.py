@@ -26,7 +26,7 @@ class CustomUserCreationForm(UserCreationForm):
             'password2': forms.PasswordInput(attrs={'class': 'form-control'}),
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'study_group': forms.TextInput(attrs={'class': 'form-control'}),
+            'study_group': forms.Select(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'})
         }
 
@@ -74,7 +74,7 @@ class ProjectForm(forms.ModelForm):
                   'implementation_period', 'short_project_description', 'long_project_description', 'poster']
         widgets = {
             'name_of_project': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Проект проект"}),
-            'target_groups': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Учебные группы, для которых предназначен проект"}),
+           # 'target_groups': forms.Select(attrs={'class': 'form-control'}),
             'short_project_description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Краткое (до 150 символов) описание проекта"}),
 
             'long_project_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3,
@@ -108,8 +108,6 @@ class ProjectEditForm(forms.ModelForm):
 
             'long_project_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3,
                                                               'placeholder': "Полное описание проекта. \nНе сдерживайте себя!\nПрямо совсем не сдерживайте"}),
-
-
 
             'project_type': forms.Select(attrs={'class': 'form-control'}),
             'implementation_period': forms.Select(attrs={'class': 'form-control'}),

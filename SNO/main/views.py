@@ -3,8 +3,10 @@ from django.contrib.auth.views import LoginView
 from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
-from django.views.generic import UpdateView, CreateView, DetailView, TemplateView
+from django.views import View
+from django.views.generic import UpdateView, CreateView, DetailView, TemplateView, ListView
 from django.contrib.auth import logout as django_logout
 
 from .models import *
@@ -99,8 +101,6 @@ def MainFiltered(request, type):
     return render(request, 'main/index.html', context=data)
 
 
-def Opd(request):
-    return render(request, 'opd/index.html')
 
 
 def ProjectPage(request, project_id):
@@ -159,9 +159,14 @@ def AddReport(request, project_id):
 
 
 def AddProject(request):
+    # print(request.method)
     if request.method == 'POST':
         form = ProjectForm(request.POST, request.FILES)
+        # print(form.is_valid())
+        # print(form.errors)
+        # print(form.cleaned_data)
         if form.is_valid():
+            # print(form.cleaned_data)
             if len(form.cleaned_data['long_project_description']) > len(form.cleaned_data['short_project_description']):
                 # if (form.cleaned_data['manager'].current_project):
                 #     form.add_error(None,
@@ -169,17 +174,22 @@ def AddProject(request):
                 #                    'или является менеджером')
                 # else:
                     try:
+                        groups = form.cleaned_data.pop('target_groups')
                         pr = Project.objects.create(edition_key=generate_edition_key(),**form.cleaned_data)
-                        # form.cleaned_data['manager'].current_project = pr
-                        # form.cleaned_data['manager'].is_free = False
-                        # form.cleaned_data['manager'].save()
-                        # return redirect('MAIN')
+                        print(groups)
+                        # for group in groups:
+                        #     pr.target_groups.add(group)
+                        pr.target_groups.add(groups)
+                        pr.save()
+
+                        return redirect('MAIN')
                     except:
                         form.add_error(None, 'Ошибка регистрации проекта')
             else:
                 form.add_error(None, 'Длинное описание проекта не может быть короче краткого!')
     else:
         form = ProjectForm()
+
     group_form = SearchForm()
     data = {
         'group_form': group_form,
@@ -259,6 +269,45 @@ def decline_app(request, student_id, project_id):
     else:
         return HttpResponse('Студент не подавал заявки на этот проект или её состояние уже изменено')
     return redirect('project', project_id=project_id)
+
+
+
+
+
+class CreateApplication(DataMixin, LoginRequiredMixin, TemplateView):
+    template_name = 'main/add_user.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user']=self.request.user
+
+        c_def = self.get_user_context()
+        return context|c_def
+    def handle_no_permission(self):
+        return redirect('login')
+    def get(self, request, **kwargs):
+        project = Project.objects.get(pk=kwargs['project_id'])
+        context = self.get_context_data(selected=project.project_type,project=project)
+
+        app, context['created'] = Applications.objects.get_or_create(project=context['project'],user=request.user)
+
+        app.save()
+
+        if context['created']:
+            letter_context ={
+                'title':f"Заявка на проект {project.name_of_project}",
+                'text':[f'На ваш проект {project.name_of_project} подали заявку.',
+                        'Информация о студенте:',
+                        f"{request.user.get_full_name()}, группа {request.user.study_group}.",
+                        f"Управление заявками: " #TODO: insert link to profile page
+                        ]
+            }
+            project.manager.email_user(subject=f"Заявки на проект {project.name_of_project}", message=f'test',
+                                   html_message=render_to_string(request=request, template_name='letter_base.html', context=letter_context))
+
+        return render(request, self.template_name, context=context)
+
+
 
 
 def ExpandTeam(request, project_id):
@@ -342,8 +391,6 @@ def reject_project(request, project_id):
             key = form.cleaned_data['edition_key']
             # print(form.cleaned_data)
             if key == project.edition_key:
-                print('OK')
-                print(form.cleaned_data)
 
                 msg = f'''Ваш проект "{project.name_of_project}" был отклонён пользователем {request.user}.
                                         Причина:
@@ -419,11 +466,18 @@ def logout(request):
     django_logout(request)
     return redirect('login')
 
-class ProfilePage(DataMixin, LoginRequiredMixin, TemplateView):
+class ProfilePage(DataMixin, LoginRequiredMixin, ListView):
     template_name = 'main/profile_page.html'
+    model = Project
+    context_object_name = 'managed_projects'
+
+    def get_queryset(self):
+        return Project.objects.filter(manager=self.request.user)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user']=self.request.user
+
         c_def = self.get_user_context(selected='profile')
         return context|c_def
 

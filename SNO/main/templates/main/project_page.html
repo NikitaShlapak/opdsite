@@ -38,7 +38,7 @@
   <img src=" {{ p.poster.url }} " class="card-img-top" alt="{{ p.poster.url }}" height="400px"style="object-fit:cover">
   <div class="card-body">
       <h3 class="card-title">Куратор: {{ p.manager.firstname }} {{ p.manager.secondname }}</h3>
-      <h5 class="card-title">Целевые группы: {{ p.target_groups }}</h5>
+      <h5 class="card-title">Учебные группы исполнителей: {% for gr in p.target_groups.all %}{{ gr.type }} {% endfor %}</h5>
       <h5 class="card-title">{{ p.get_project_status_display }}</h5>
       {% for line in desc %}
       <p class="card-text">{{ line }}</p>

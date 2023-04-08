@@ -5,8 +5,15 @@ from .forms import CustomUserCreationForm, CustomUserChangeForm
 from .models import *
 
 
+
+class ApplicationsAdmin(admin.ModelAdmin):
+    list_display = ('user', 'project')
+    list_display_links = list_display
+    search_fields = list_display
+    sortable_by = list_display
+
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('name_of_project', 'manager', 'project_type', 'project_status', 'edition_key')
+    list_display = ('name_of_project', 'manager', 'project_type', 'project_status')
     list_display_links = ('name_of_project',)
     list_editable = ('project_status', )
     search_fields = ('name_of_project', 'manager__firstname', 'manager__secondname')
@@ -33,7 +40,7 @@ class StudyGroupAdmin(admin.ModelAdmin):
     list_display_links = ('type', 'subgroup','year')
     sortable_by = ('type', 'subgroup','year')
 
-
+admin.site.register(Applications, ApplicationsAdmin)
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectReport, ProjectReportAdmin)

@@ -27,8 +27,22 @@
         </li>
         {% else %}
         <li>
-            <a href="{% url 'profile' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Личный кабинет</a>
+            {% if selected != 'profile' %}
+        <a href="{% url 'profile' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Личный кабинет</a>
+            {% else %}
+        <a href="" class="btn btn-outline-primary disabled mb-1 w-100" role="button">Личный кабинет</a>
+            {% endif %}
         </li>
+
+
+
+
+            {% if request.user.is_staff %}
+                <li>
+                    <a href="{% url 'admin:index' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Панель администратора</a>
+                </li>
+            {% endif %}
+
         {% endif %}
         {% if group_form %}
         <li>
@@ -175,11 +189,7 @@
 
       <hr>
 
-{% if selected != 'reg' %}
-        <a href="{% url 'register' %}" class="btn btn-outline-primary w-100" role="button">Регистрация менеджера</a>
-{% else %}
-        <a href="" class="btn btn-primary disabled w-100" role="button">Регистрация менеджера</a>
-{% endif %}
+
 
 {% if request.user.is_authenticated %}
         <li>

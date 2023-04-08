@@ -11,4 +11,27 @@
 <h3>Группа: {{ user.study_group }}</h3>
 
 {{ user }}
+
+{% if managed_projects %}
+  <h1>Проекты под мои управлением:</h1>
+  {% for p in managed_projects %}
+    {% include 'project_card.html' %}
+  {% endfor %}
+{% endif %}
+
+
+
+
+<h1>Мои проекты:</h1>
+
+
+
+
+{% for p in projects %}
+{% include 'project_card.html' %}
+{% endfor %}
+
+
+
+
 {% endblock %}
