@@ -55,7 +55,7 @@
 {% if managed_projects %}
   <h1>Проекты под мои управлением:</h1>
   {% for p in managed_projects %}
-    {% include 'project_card.html' %}
+    {% include 'project_card.html' with menu=True %}
   {% endfor %}
 {% endif %}
 

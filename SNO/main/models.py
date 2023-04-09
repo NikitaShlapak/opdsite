@@ -12,14 +12,11 @@ from django.urls import reverse
 class CustomUser(AbstractUser):
 
     username = models.CharField(max_length=50, verbose_name='Имя пользователя', unique=True,
-                                error_messages={'unique': "Пользователь с таким именем уже "
-                                                          "зарегистрирован"})
+                                error_messages={'unique': "Пользователь с таким именем уже зарегистрирован!"})
     password = models.CharField(max_length=255, verbose_name='Пароль')
-    email = models.EmailField(unique=False, verbose_name='Почта')
-
-
+    email = models.EmailField(unique=False, verbose_name='Почта', #TODO: set to TRUE for prod!
+                              error_messages={'unique': "К этой почте уже привязана учётная запись!"})
     registration_time = models.DateTimeField('Дата регистрации', auto_now_add=True)
-
 
     study_group = models.ForeignKey('StudyGroup',verbose_name='Група', on_delete=models.SET_NULL, default='StudyGroup.StudyGroupType.TEACHER', null=True)
 
@@ -76,8 +73,6 @@ class Project(models.Model):
 
     def get_absolute_url(self):
         return reverse('project', kwargs={'project_id': self.pk})
-
-
 
     def is_approved(self):
         return self.manager.is_approved or self.manager.is_staff
@@ -151,7 +146,6 @@ class StudyGroup(models.Model):
         TEACHER = 'Преподаватель', 'Преподаватель'
 
     type = models.CharField(max_length=15, verbose_name='Тип группы',choices=StudyGroupType.choices, default=StudyGroupType.TEACHER)
-
 
     year = models.SmallIntegerField(verbose_name='год поступления', default=datetime.today().year)
     subgroup = models.SmallIntegerField(default=0, verbose_name='Подгруппа')

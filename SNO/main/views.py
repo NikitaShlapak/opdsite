@@ -8,13 +8,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import UpdateView, CreateView, DetailView, TemplateView, ListView
+from django.views.generic import UpdateView, CreateView, DetailView, TemplateView, ListView, FormView
 from django.contrib.auth import logout as django_logout
 
 from .models import *
 from .forms import *
 from .utils import *
-from SNO.env import EMAIL_HOST_USER
+
 
 logging.basicConfig(level=logging.INFO, filename="main_views.log",filemode="a",
                     format="%(asctime)s %(levelname)s %(message)s")
@@ -63,14 +63,6 @@ def Main(request):
     return render(request, 'main/index.html', context=data)
 
 
-def Info(request):
-    group_form = SearchForm()
-    data = {
-        'group_form': group_form,
-        'selected': 'info'
-    }
-    data['title'] = form_title(data['selected'])
-    return render(request, 'main/info.html', context=data)
 
 
 def MainFiltered(request, type):
@@ -106,6 +98,45 @@ def MainFiltered(request, type):
     return render(request, 'main/index.html', context=data)
 
 
+def Info(request):
+    group_form = SearchForm()
+    data = {
+        'group_form': group_form,
+        'selected': 'info'
+    }
+    data['title'] = form_title(data['selected'])
+    return render(request, 'main/info.html', context=data)
+
+
+class ProjectCreationView(DataMixin, LoginRequiredMixin, CreateView):
+    form_class = ProjectCreationForm
+    template_name = "main/add_project.html"
+
+    def get_context_data(self,  **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(selected='add')
+        return context|c_def
+
+    def post(self,request, **kwargs):
+        form = ProjectCreationForm(request.POST, request.FILES)
+        if form.is_valid():
+            if len(form.cleaned_data['long_project_description']) > len(form.cleaned_data['short_project_description']):
+                groups = form.cleaned_data.pop('target_groups')
+                try:
+                    pr = Project.objects.create(edition_key=generate_edition_key(),
+                                                manager=request.user,
+                                                **form.cleaned_data)
+                    for group in groups:
+                        pr.target_groups.add(group)
+                    pr.save()
+                    logging.info(f"Successfully created project {pr}. Manager - {request.user}")
+                    return redirect('project', pr.pk)
+                except:
+                    form.add_error(None, 'Ошибка регистрации проекта')
+            else:
+                form.add_error(None, 'Длинное описание проекта не может быть короче краткого!')
+        return render(request, self.template_name, context={'form':form})
+
 
 class ProjectView(DataMixin, DetailView):
     template_name = 'main/project_page.html'
@@ -123,7 +154,161 @@ class ProjectView(DataMixin, DetailView):
 
 
 
-def AddReport(request, project_id):
+
+
+
+class ProjectUpdateView(DataMixin, LoginRequiredMixin, UpdateView): #TODO: hard refactor
+    model = Project
+    template_name = "main/edit_project.html"
+    pk_url_kwarg = 'project_id'
+    context_object_name = 'p'
+    form_class = ProjectEditForm
+
+    def get(self, request, **kwargs):
+        self.extra_context={'project':get_object_or_404(Project, pk=kwargs['project_id'])}
+        print(kwargs)
+        return super().get(request, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.extra_context = {'project': get_object_or_404(Project, pk=kwargs['project_id'])}
+        return super().post(request,*args, **kwargs)
+
+    def form_valid(self, form):
+        project = self.extra_context['project']
+        old_groups = project.target_groups.all()
+        new_groups = form.cleaned_data.pop('target_groups')
+
+        updated_fields = []
+        for field in form.cleaned_data:
+            if not form.cleaned_data[field]==project.__dict__[field]:
+                updated_fields.append(field)
+        if list(old_groups) != list(new_groups):
+            updated_fields.append('target_groups')
+        if not updated_fields:
+            form.add_error(None, 'Вы ничего не изменили')
+            return self.form_invalid(form)
+
+        if len(form.cleaned_data['long_project_description']) > len(form.cleaned_data['short_project_description']):
+            try:
+                Project.objects.filter(pk=project.pk).update(**form.cleaned_data)
+                if project.project_status == Project.ProjectStatus.REJECTED:
+                    project.project_status = Project.ProjectStatus.UNDERREVIEW
+                    project.save()
+                if list(old_groups) != list(new_groups):
+                    project.target_groups.clear()
+                    project.target_groups.add(*new_groups)
+                    project.save()
+            except:
+                logging.error(f"Can not update project {project}. User: {self.request.user.username}")
+                return redirect('project', project.pk)
+            else:
+                logging.info(f"Successfully updated project {project}. User: {self.request.user.username}.\n{updated_fields=}")
+                return redirect('project', project.pk)
+        else:
+            form.add_error(None, 'Длинное описание проекта не может быть короче краткого!')
+            return self.form_invalid(form)
+        return HttpResponse(', '.join(updated_fields))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(selected='register')
+        return context | c_def
+
+    def handle_no_permission(self):
+        return redirect('login')
+
+class SetProjectStatusView(DataMixin, LoginRequiredMixin, View):
+    def handle_no_permission(self):
+        return redirect('login')
+    def get(self, request, **kwargs):
+        project = get_object_or_404(Project,pk=kwargs['project_id'])
+        if not (request.user.is_staff or request.user.is_superuser):
+            self.handle_no_permission()
+        else:
+            if kwargs['action'] == 'confirm':
+                status = project.ProjectStatus.ENROLLMENTOPENED
+            elif kwargs['action'] == 'close':
+                status = project.ProjectStatus.ENROLLMENTCLOSED
+            elif kwargs['action'] == 'delete':
+                try:
+                    project.delete()
+                except:
+                    logging.error(f"Can not delete project {project}. User: {request.user.username}")
+                    return redirect('MAIN')
+                else:
+                    logging.info(f"Successfully deleted project {project} by {request.user.username}")
+                    return redirect('profile')
+            try:
+                project.project_status = status
+                project.save()
+            except:
+                logging.error(f'Can not set status to "{status}". Project: {project}. User: {request.user}')
+            else:
+                logging.info(f"Project status set to '{status}'. Project: {project}. User: {request.user}")
+            return redirect('project', project.pk)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context()
+        context = context | c_def
+        return context
+
+
+class RejectProjectView(DataMixin, LoginRequiredMixin, DetailView, FormView):
+    template_name = 'main/project_page.html'
+    model = Project
+    pk_url_kwarg = 'project_id'
+    context_object_name = 'p'
+
+    form_class = ProjectRejectForm
+    success_url = '/accounts/profile'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(selected='register')
+        context = context | c_def
+        self.extra_context['project'] = context['p']
+        return context
+
+    def handle_no_permission(self):
+        return redirect('login')
+
+    def form_valid(self, form):
+        data = form.cleaned_data
+        project = self.extra_context['project']
+        user = self.extra_context['user']
+
+        letter_context = {
+            'title': f"Изменение статуса проекта {project.name_of_project}",
+            'text': [f'Ваш проект {project.name_of_project} был отклонён']
+        }
+        if not data['hide_name']:
+            letter_context['text'][0] = letter_context['text'][0] + f" пользователем {user.get_full_name()}"
+        letter_context['text'][0] = letter_context['text'][0] + '.'
+        letter_context['text'].append(f"Причина:\n{data['reason']}.")
+        letter_context['text'].append(f"Комментарий:\n{data['comment']}.")
+        letter_context['text'].append(f"Личный кабинет: ")  # TODO insert profile link
+
+        project.manager.email_user(subject=f"Изменение статуса проекта {project.name_of_project}", message=f'test',
+                                   html_message=render_to_string(request=self.extra_context['request'],
+                                                                 template_name='letter_base.html',
+                                                                 context=letter_context))
+        logging.info(
+            f"Project declined. User: {user}, Project: {project.name_of_project}, message:{letter_context['text']}")
+        project.project_status = project.ProjectStatus.REJECTED
+        project.save()
+        return super().form_valid(form)
+
+    def post(self, request, **kwargs):
+        self.extra_context = {'project': get_object_or_404(Project, pk=kwargs['project_id']),
+                              'user': request.user,
+                              'request': request}
+        return super().post(request, **kwargs)
+
+
+
+
+
+def AddReport(request, project_id): # TODO: refactor to class
     project = Project.objects.get(pk=project_id)
     get_object_or_404(project)
     team = CustomUser.objects.filter(current_project=project_id)
@@ -158,37 +343,43 @@ def AddReport(request, project_id):
     return render(request, 'main/add_coment.html', data)
 
 
-class ProjectCreationView(DataMixin, LoginRequiredMixin, CreateView):
-    form_class = ProjectCreationForm
-    template_name = "main/add_project.html"
 
-    def get_context_data(self,  **kwargs):
+class CreateApplication(DataMixin, LoginRequiredMixin, TemplateView):
+    template_name = 'main/add_user.html'
+
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(selected='add')
+        context['user']=self.request.user
+
+        c_def = self.get_user_context()
         return context|c_def
+    def handle_no_permission(self):
+        return redirect('login')
+    def get(self, request, **kwargs):
+        project = Project.objects.get(pk=kwargs['project_id'])
+        context = self.get_context_data(selected=project.project_type,project=project)
 
-    def post(self,request, **kwargs):
-        form = ProjectCreationForm(request.POST, request.FILES)
-        if form.is_valid():
-            if len(form.cleaned_data['long_project_description']) > len(form.cleaned_data['short_project_description']):
-                groups = form.cleaned_data.pop('target_groups')
-                try:
-                    pr = Project.objects.create(edition_key=generate_edition_key(),
-                                                manager=request.user,
-                                                **form.cleaned_data)
-                    for group in groups:
-                        pr.target_groups.add(group)
-                    pr.save()
-                    logging.info(f"Successfully created project {pr}. Manager - {request.user}")
-                    return redirect('project', pr.pk)
-                except:
-                    form.add_error(None, 'Ошибка регистрации проекта')
-            else:
-                form.add_error(None, 'Длинное описание проекта не может быть короче краткого!')
-        return render(request, self.template_name, context={'form':form})
+        # if request.user in project.team.all():
+        #     return
 
+        app, context['created'] = Applications.objects.get_or_create(project=context['project'],user=request.user)
 
+        app.save()
 
+        if context['created']:
+            letter_context ={
+                'title':f"Заявка на проект {project.name_of_project}",
+                'text':[f'На ваш проект {project.name_of_project} подали заявку.',
+                        'Информация о студенте:',
+                        f"{request.user.get_full_name()}, группа {request.user.study_group}.",
+                        f"Управление заявками: " #TODO: insert link to profile page
+                        ]
+            }
+            project.manager.email_user(subject=f"Заявки на проект {project.name_of_project}", message=f'test',
+                                   html_message=render_to_string(request=request, template_name='letter_base.html', context=letter_context))
+            logging.info(f'Application created. User: {request.user}, Project: {project.name_of_project}')
+
+        return render(request, self.template_name, context=context)
 class ConfirmOrDeclineApplication(DataMixin,LoginRequiredMixin,TemplateView):
     def handle_no_permission(self):
         return redirect('login')
@@ -242,127 +433,6 @@ class ConfirmOrDeclineApplication(DataMixin,LoginRequiredMixin,TemplateView):
 
 
 
-class CreateApplication(DataMixin, LoginRequiredMixin, TemplateView):
-    template_name = 'main/add_user.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['user']=self.request.user
-
-        c_def = self.get_user_context()
-        return context|c_def
-    def handle_no_permission(self):
-        return redirect('login')
-    def get(self, request, **kwargs):
-        project = Project.objects.get(pk=kwargs['project_id'])
-        context = self.get_context_data(selected=project.project_type,project=project)
-
-        # if request.user in project.team.all():
-        #     return
-
-        app, context['created'] = Applications.objects.get_or_create(project=context['project'],user=request.user)
-
-        app.save()
-
-        if context['created']:
-            letter_context ={
-                'title':f"Заявка на проект {project.name_of_project}",
-                'text':[f'На ваш проект {project.name_of_project} подали заявку.',
-                        'Информация о студенте:',
-                        f"{request.user.get_full_name()}, группа {request.user.study_group}.",
-                        f"Управление заявками: " #TODO: insert link to profile page
-                        ]
-            }
-            project.manager.email_user(subject=f"Заявки на проект {project.name_of_project}", message=f'test',
-                                   html_message=render_to_string(request=request, template_name='letter_base.html', context=letter_context))
-            logging.info(f'Application created. User: {request.user}, Project: {project.name_of_project}')
-
-        return render(request, self.template_name, context=context)
-
-
-
-
-def verify_edition(request, project_id):
-    project = Project.objects.get(pk=project_id)
-    if request.method == 'POST':
-        form = ProjectConfirmationForm(request.POST)
-        if form.is_valid():
-            key = form.cleaned_data['edition_key']
-            # print(form.cleaned_data)
-            if key == project.edition_key:
-                # print('OK')
-                return redirect('edit', pk=project.pk, edition_key=key)
-            else:
-                form.add_error(None, 'Код неверен')
-
-    else:
-        form = ProjectConfirmationForm()
-    group_form = SearchForm()
-    data = {
-        'group_form': group_form,
-        'p': project,
-        'url': 'edit',
-        'selected': 'add',
-        'form': form
-    }
-    return render(request, 'main/edit_project.html', context=data)
-
-
-def reject_project(request, project_id): #TODO refactor to class
-    project = Project.objects.get(pk=project_id)
-    if request.method == 'POST':
-        form = ProjectRejectForm(request.POST)
-        if form.is_valid():
-            key = form.cleaned_data['edition_key']
-            # print(form.cleaned_data)
-            if key == project.edition_key:
-
-                msg = f'''Ваш проект "{project.name_of_project}" был отклонён пользователем {request.user}.
-                                        Причина:
-                                        {form.cleaned_data['reason']} 
-                                        Комментарий:
-                                        {form.cleaned_data['comment']} 
-                                        Перейдите по ссылке, чтобы отредактировать заявку:
-                                        http://opd.iate.obninsk.ru/project/{project.pk}/edit/{key}
-                                        '''
-                send_mail(
-                    f'Заявки | {project.name_of_project}',
-                    msg,
-                    EMAIL_HOST_USER,
-                    [project.manager_email],
-                    fail_silently=False,
-                )
-
-                project.project_status = project.ProjectStatus.REJECTED
-                project.save()
-
-                return redirect('project', pk=project.pk)
-            else:
-                form.add_error(None, 'Код неверен')
-
-    else:
-        form = ProjectRejectForm()
-    group_form = SearchForm()
-    data = {
-        'group_form': group_form,
-        'p': project,
-        'url': 'edit',
-        'selected': 'add',
-        'form': form
-    }
-    return render(request, 'main/edit_project.html', context=data)
-
-
-
-class ProjectUpdateView(UpdateView): #TODO: hard refactor
-    model = Project
-    template_name = "main/edit_project.html"
-
-    form_class = ProjectEditForm
-
-    def get_context_data(self):
-        context = super(ProjectUpdateView, self).get_context_data()| self.kwargs
-        return context
 
 
 class RegisterUser(DataMixin, CreateView):

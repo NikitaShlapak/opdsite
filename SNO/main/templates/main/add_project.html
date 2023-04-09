@@ -26,7 +26,13 @@
                           <label for="{{ f.id_for_label }}" class="form-label">{{ f.label }}</label>
                   </span>
 
-                  {{ f }}
+                   {% if f == form.target_groups %}
+                                    <div class="d-flex border rounded-end pt-2 flex-row w-75">
+                                    {% endif %}
+                                        {{ f }}
+                                    {% if f == form.target_groups %}
+                                    </div>
+                                    {% endif %}
                     {% if f == form.manager %}
                     <a  href="{% url 'register' %}" role="button" class="btn btn-primary w-25 " type="button" >Зарегистрировать менеджера</a>
                     {% endif %}

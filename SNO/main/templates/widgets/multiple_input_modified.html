@@ -1,0 +1,17 @@
+{% with id=widget.attrs.id %}
+  <div{% if id %} id="{{ id }}"{% endif %}{% if widget.attrs.class %} class="{{ widget.attrs.class }} border border-2 border-danger"{% endif %}>
+    {% for group, options, index in widget.optgroups %}
+      {% if group %}
+        <div class="border border-2 border-dark">123<label>{{ group }}</label>
+      {% endif %}
+      {% for option in options %}
+        <span class="p-2">
+          {% include option.template_name with widget=option %}
+        </span>
+      {% endfor %}
+      {% if group %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endwith %}

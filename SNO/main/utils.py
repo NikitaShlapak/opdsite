@@ -1,3 +1,5 @@
+from django.forms import CheckboxSelectMultiple
+
 from .forms import SearchForm, SearchNameForm
 from .models import *
 
