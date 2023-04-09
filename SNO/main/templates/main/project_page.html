@@ -44,22 +44,20 @@
                   {% elif p.project_status == 'closed' %}
                       <hr>
                       <h3>Команда проекта:</h3>
-                      <table class="table table-striped" id="team">
+                      <table class="table border table-striped" id="team">
                           <thead>
                             <tr>
                               <th scope="col">Студент</th>
                               <th scope="col">Группа</th>
                               <th scope="col">Email</th>
-                              <th scope="col">Статус</th>
                             </tr>
                           </thead>
                           <tbody>
-                          {% for one in team %}
+                          {% for one in p.team.all %}
                             <tr>
                               <td>{{ one.get_full_name }}</td>
-                              <td>{{ one.group }}</td>
+                              <td>{{ one.study_group }}</td>
                               <td>{{ one.email }}</td>
-                              <td>{{ one.get_state_display }}</td>
                             </tr>
                            {% endfor %}
                           </tbody>
@@ -113,11 +111,32 @@
             <div class="card-body p-1">
                 <div class="border border-2 rounded-2 px-2 py-1">
                     <h5>Управление проектом:</h5>
+                    {% if p.project_status == 'under_review' or p.project_status == 'rejected' or request.user.is_superuser %}
+                        <a href="{% url 'edit' p.pk %}" role="button" class="btn btn-outline-success w-100 mt-2">Редактировать</a>
+                    {% endif %}
+                    {% if p.manager == request.user or request.user.is_superuser %}
+                        {% if p.project_status == 'opened'  %}
+                            <a href="{% url 'set_project_status' p.pk 'close' %}" role="button" class="btn btn-outline-primary w-100 mt-2">Закрыть Набор</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if request.user != p.manager or request.user.is_superuser %}
+                        {% if  request.user.is_staff or request.user.is_superuser %}
+                            {% if p.project_status == 'under_review' or p.project_status == 'rejected' or request.user.is_superuser %}
+                                {% if p.project_status == 'under_review' or p.project_status == 'rejected' %}
+                                    <br>
+                                    <a href="{% url 'set_project_status' p.pk 'confirm' %}" role="button" class="btn btn-outline-success w-100 mt-2" >Подтвердить</a>
+                                {% endif %}
 
-                    <a href="{% url 'edit' p.pk p.edition_key %}" role="button" class="btn btn-primary w-100 mt-2">Редактировать</a>
-                    {% if request.user.is_staff and p.project_status == 'under_review' or p.project_status == 'rejected' or request.user.is_superuser %}
+                                    <br>
+                                    <a role="button" class="btn btn-outline-danger w-100 mt-2" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">Отклонить</a>
+
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+
+                    {% if request.user == p.manager or request.user.is_superuser %}
                     <br>
-                    <a role="button" class="btn btn-danger w-100 mt-2" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">Отклонить</a>
+                    <a href="{% url 'set_project_status' p.pk 'delete' %}" role="button" class="btn btn-danger w-100 mt-2">Удалить</a>
                     {% endif %}
                 </div>
                 {% if applyies %}
@@ -154,12 +173,13 @@
   <div class="modal-dialog ">
     <div class="modal-content ">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="deleteModalLabel">Введите ключ безопасности</h1>
+        <h1 class="modal-title fs-5" id="deleteModalLabel">Отклонение проекта</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <form action="{% url 'verify_delete' p.pk %}" method="post">
         {% csrf_token %}
+
         <div class="container w-100 py-2">
           {% for field in reject_form %}
           <div class="row my-1 align-items-center">

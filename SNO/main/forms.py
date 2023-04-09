@@ -1,16 +1,12 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm
+from django.forms import CheckboxSelectMultiple
 
 from .models import *
 
-class ProjectConfirmationForm(forms.Form):
-   edition_key = forms.IntegerField(label="Ключ безопасности",widget=forms.TextInput(attrs={'class': 'form-control'}))
-
-class ProjectRejectForm(forms.Form):
-   edition_key = forms.IntegerField(label="Ключ безопасности",widget=forms.TextInput(attrs={'class': 'form-control'}))
-   reason = forms.CharField(label="Причина отклонения",max_length=125, widget=forms.TextInput(attrs={'class': 'form-control'}))
-   comment = forms.CharField(label="Комментарий",widget=forms.Textarea(attrs={'rows':10,'class': 'form-control'}))
-
+class UserCheckboxSelectMultiple(CheckboxSelectMultiple):
+    template_name = "widgets/multiple_input_modified.html"
+    pass
 
 class CustomUserCreationForm(UserCreationForm):
     username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'class': 'form-control'}))
@@ -43,7 +39,7 @@ class CustomUserChangeForm(UserChangeForm):
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'email')
+        fields = ('username', 'email', 'study_group')
 
 
 class TeamMemberForm(forms.ModelForm):
@@ -74,7 +70,7 @@ class ProjectCreationForm(forms.ModelForm):
                   'implementation_period', 'short_project_description', 'long_project_description', 'poster']
         widgets = {
             'name_of_project': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Проект проект"}),
-           # 'target_groups': forms.Select(attrs={'class': 'form-control'}),
+            'target_groups': UserCheckboxSelectMultiple(),
             'short_project_description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Краткое (до 150 символов) описание проекта"}),
 
             'long_project_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3,
@@ -90,7 +86,6 @@ class ProjectCreationForm(forms.ModelForm):
 
         }
 
-
 class ProjectEditForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -103,7 +98,7 @@ class ProjectEditForm(forms.ModelForm):
                   'implementation_period', 'short_project_description', 'long_project_description', ]
         widgets = {
             'name_of_project': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Проект проект"}),
-            'target_groups': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Учебные группы, для которых предназначен проект"}),
+            'target_groups': UserCheckboxSelectMultiple(),
             'short_project_description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Краткое (до 150 символов) описание проекта"}),
 
             'long_project_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3,
@@ -114,6 +109,12 @@ class ProjectEditForm(forms.ModelForm):
 
 
         }
+
+class ProjectRejectForm(forms.Form):
+   reason = forms.CharField(label="Причина отклонения",max_length=125, widget=forms.TextInput(attrs={'class': 'form-control'}))
+   comment = forms.CharField(label="Комментарий", widget=forms.Textarea(attrs={'rows': 3,'class': 'form-control'}))
+   hide_name = forms.BooleanField(label='Скрыть моё имя в письме куратору',widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),required=False)
+
 
 
 class ProjectReportForm(forms.ModelForm):
