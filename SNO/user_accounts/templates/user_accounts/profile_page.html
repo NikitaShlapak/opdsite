@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends '../base.html' %}
 {% load static %}
 
 {% block title %}{{ title }}{% endblock %}
@@ -55,7 +55,7 @@
 {% if managed_projects %}
   <h1>Проекты под мои управлением:</h1>
   {% for p in managed_projects %}
-    {% include 'project_card.html' with menu=True %}
+    {% include '../project_card.html' with menu=True %}
   {% endfor %}
 {% endif %}
 
@@ -64,7 +64,7 @@
 {% if projects %}
   <h1>Мои проекты:</h1>
   {% for p in projects %}
-    {% include 'project_card.html' %}
+    {% include '../project_card.html' %}
   {% endfor %}
 {% endif %}
 

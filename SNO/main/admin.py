@@ -1,9 +1,8 @@
 from django.contrib import admin, messages
-from django.contrib.auth.admin import UserAdmin
 
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, ngettext
-from .forms import CustomUserCreationForm, CustomUserChangeForm
+from django.utils.translation import ngettext
+
 from .models import *
 
 
@@ -17,7 +16,7 @@ class ApplicationsAdmin(admin.ModelAdmin):
 
     actions = ['confirm_applications']
 
-    @admin.action(description='Одобриить заявки')
+    @admin.action(description='Одобрить заявки')
     def confirm_applications(self, request, queryset):
         added = not_added = 0
         for apply in queryset:
@@ -55,7 +54,7 @@ class ProjectAdmin(admin.ModelAdmin):
     get_html_poster.short_description="Постер (превью)"
 
     actions = ['confirm_projects']
-    @admin.action(description='Одобриить проекты')
+    @admin.action(description='Одобрить проекты')
     def confirm_projects(self, request, queryset):
         updated = queryset.update(project_status=Project.ProjectStatus.ENROLLMENTOPENED)
         self.message_user(request, ngettext(
@@ -70,51 +69,9 @@ class ProjectReportAdmin(admin.ModelAdmin):
     search_fields = ('parent_project', 'author', 'text')
     sortable_by = ('parent_project','author')
 
-class CustomUserAdmin(UserAdmin):
-    add_form = CustomUserCreationForm
-    form = CustomUserChangeForm
-    model = CustomUser
-    list_display = ('username','first_name', 'last_name', 'study_group')
-    list_display_links = ('username','first_name', 'last_name', 'study_group')
-    sortable_by = ('first_name','last_name', 'study_group')
-    fieldsets = (
-        (None, {"fields": ("username", "password")}),
-        (_("Personal info"), {"fields": ("first_name", "last_name", "email", "study_group")}),
-        (
-            _("Permissions"),
-            {
-                "fields": (
-                    "is_approved",
-                    "is_Free",
-                    "is_active",
-                    "is_staff",
-                    "is_superuser",
-                    "groups",
-                    "user_permissions",
-                ),
-            },
-        ),
-        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
-    )
-    add_fieldsets = (
-        (
-            "Основные данные",
-            {
-                "classes": ("wide",),
-                "fields": ("username",'email', "password1", "password2",'first_name','last_name', 'study_group'),
-            },
-        ),
-    )
-
-class StudyGroupAdmin(admin.ModelAdmin):
-    list_display = ('type', 'subgroup','year')
-    list_display_links = ('type', 'subgroup','year')
-    sortable_by = ('type', 'subgroup','year')
 
 
 
 admin.site.register(Applications, ApplicationsAdmin)
-admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectReport, ProjectReportAdmin)
-admin.site.register(StudyGroup, StudyGroupAdmin)

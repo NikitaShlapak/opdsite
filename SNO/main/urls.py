@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import RegisterUser, ConfirmOrDeclineApplication, LoginUser, ProfilePage, ProjectUpdateView, \
+from .views import ConfirmOrDeclineApplication, ProjectUpdateView, \
     CreateApplication, ProjectView, ProjectCreationView, RejectProjectView,  \
     SetProjectStatusView
 
@@ -10,15 +10,6 @@ urlpatterns = [
 
     path('info/', views.Info, name='info'),
 
-    path('register/', RegisterUser.as_view(), name='register'),
-    path('login/', LoginUser.as_view(), name='login'),
-    path('logout/', views.logout, name='logout'),
-
-    path('accounts/profile/', ProfilePage.as_view(), name='profile'),
-    #path('accounts/user/<int:user_id>', UserPage.as_view(), name='user'), TODO: add UserView class
-    #path('accounts/user/<int:user_id>', UserPage.as_view(), name='user'), TODO: add UserUpdte class
-    #path('accounts/user/<int:user_id>', UserPage.as_view(), name='user'), TODO: add UserDelete class
-
     path('project/add/', ProjectCreationView.as_view(), name='add_project'),
     path('project/<int:project_id>/', ProjectView.as_view(), name='project'),
     path('project/<int:project_id>/edit/', ProjectUpdateView.as_view(), name='edit'),
@@ -27,7 +18,6 @@ urlpatterns = [
 
     path('project/<int:project_id>/register/', CreateApplication.as_view(), name='expand'),
     path('project/<int:app_id>/<str:action>/', ConfirmOrDeclineApplication.as_view(), name='apply_or_decline'),
-
 
     path('project/<int:project_id>/add_report/', views.AddReport, name='add_report'),
 

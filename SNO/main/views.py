@@ -1,17 +1,11 @@
 import logging
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView
-from django.core.mail import send_mail
-from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
-from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import UpdateView, CreateView, DetailView, TemplateView, ListView, FormView
-from django.contrib.auth import logout as django_logout
+from django.views.generic import UpdateView, CreateView, DetailView, TemplateView, FormView
 
-from .models import *
 from .forms import *
 from .utils import *
 
@@ -215,11 +209,11 @@ class ProjectUpdateView(DataMixin, LoginRequiredMixin, UpdateView):
         return context | c_def
 
     def handle_no_permission(self):
-        return redirect('login')
+        return redirect('user_accounts:login')
 
 class SetProjectStatusView(DataMixin, LoginRequiredMixin, View):
     def handle_no_permission(self):
-        return redirect('login')
+        return redirect('user_accounts:login')
     def get(self, request, **kwargs):
         project = get_object_or_404(Project,pk=kwargs['project_id'])
         if not (request.user.is_staff or request.user.is_superuser):
@@ -237,7 +231,7 @@ class SetProjectStatusView(DataMixin, LoginRequiredMixin, View):
                     return redirect('MAIN')
                 else:
                     logging.info(f"Successfully deleted project {project} by {request.user.username}")
-                    return redirect('profile')
+                    return redirect('user_accounts:profile')
             try:
                 project.project_status = status
                 project.save()
@@ -270,7 +264,7 @@ class RejectProjectView(DataMixin, LoginRequiredMixin, DetailView, FormView):
         return context
 
     def handle_no_permission(self):
-        return redirect('login')
+        return redirect('user_accounts:login')
 
     def form_valid(self, form):
         data = form.cleaned_data
@@ -354,7 +348,7 @@ class CreateApplication(DataMixin, LoginRequiredMixin, TemplateView):
         c_def = self.get_user_context()
         return context|c_def
     def handle_no_permission(self):
-        return redirect('login')
+        return redirect('user_accounts:login')
     def get(self, request, **kwargs):
         project = Project.objects.get(pk=kwargs['project_id'])
         context = self.get_context_data(selected=project.project_type,project=project)
@@ -380,9 +374,10 @@ class CreateApplication(DataMixin, LoginRequiredMixin, TemplateView):
             logging.info(f'Application created. User: {request.user}, Project: {project.name_of_project}')
 
         return render(request, self.template_name, context=context)
+
 class ConfirmOrDeclineApplication(DataMixin,LoginRequiredMixin,TemplateView):
     def handle_no_permission(self):
-        return redirect('login')
+        return redirect('user_accounts:login')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user']=self.request.user
@@ -427,64 +422,8 @@ class ConfirmOrDeclineApplication(DataMixin,LoginRequiredMixin,TemplateView):
         else:
             logging.info(f"{manager} tried to fuck YOU! (attempt to {kwargs['action']} an application {app=}")
             self.handle_no_permission()
-        return redirect('profile')
+        return redirect('user_accounts:profile')
 
 
 
-
-
-
-
-class RegisterUser(DataMixin, CreateView):
-    form_class = CustomUserCreationForm
-    template_name = "main/register+login.html"
-    success_url = reverse_lazy('login')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(selected='register')
-        return context|c_def
-
-
-class LoginUser(DataMixin, LoginView):
-    form_class = CustomUserAuthenticationForm
-    template_name = 'main/register+login.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(selected='login')
-        return context|c_def
-    # def get_success_url(self):
-    #     return reverse_lazy('MAIN')
-
-def logout(request):
-    django_logout(request)
-    return redirect('login')
-
-class ProfilePage(DataMixin, LoginRequiredMixin, ListView):
-    template_name = 'main/profile_page.html'
-    model = Project
-    context_object_name = 'managed_projects'
-
-    def get_queryset(self):
-        return Project.objects.filter(manager=self.request.user)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['user']=self.request.user
-        context['projects']=self.request.user.project_set.all()
-        context['my_applies'] = Applications.objects.filter(user=self.request.user)
-        my_projects = Project.objects.filter(manager=self.request.user)
-        my_project_ids=[]
-        for project in my_projects:
-            my_project_ids.append(project.pk)
-        # print(my_project_ids)
-        context['managed_applies'] = Applications.objects.filter(project__pk__in=my_project_ids).order_by('-pk')
-        # print(len(context['managed_applies']))
-
-        c_def = self.get_user_context(selected='profile')
-        return context|c_def
-
-    def handle_no_permission(self):
-        return redirect('login')
 

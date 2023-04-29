@@ -22,13 +22,13 @@
     <ul class="nav nav-pills flex-column mb-auto sticky-top ">
         {% if not request.user.is_authenticated %}
         <li class="mt-2">
-            <a href="{% url 'login' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Войти</a>
-            <a href="{% url 'register' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Зарегистрироваться</a>
+            <a href="{% url 'user_accounts:login' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Войти</a>
+            <a href="{% url 'user_accounts:register' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Зарегистрироваться</a>
         </li>
         {% else %}
         <li class="mt-2">
             {% if selected != 'profile' %}
-        <a href="{% url 'profile' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Личный кабинет</a>
+        <a href="{% url 'user_accounts:profile' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Личный кабинет</a>
             {% else %}
         <a href="" class="btn btn-outline-primary disabled mb-1 w-100" role="button">Личный кабинет</a>
             {% endif %}
@@ -193,7 +193,7 @@
 
 {% if request.user.is_authenticated %}
         <li>
-            <a href="{% url 'logout' %}" class="btn btn-outline-danger mt-1 w-100" role="button">Выйти</a>
+            <a href="{% url 'user_accounts:logout' %}" class="btn btn-outline-danger mt-1 w-100" role="button">Выйти</a>
         </li>
 {% endif %}
 
