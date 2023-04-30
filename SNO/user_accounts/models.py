@@ -70,7 +70,7 @@ class CustomUser(AbstractUser):
     registration_time = models.DateTimeField('Дата регистрации', auto_now_add=True)
 
     study_group = models.ForeignKey(StudyGroup,verbose_name='Учебная группа', null=True, on_delete=models.SET_NULL, blank=True)
-    is_approved = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False, verbose_name='Подтверждённый менеджер', help_text='Статус подтверждённого менеджера. Его проекты автоматически подтверждаются, а также выделяются особым значком в списке проектов.')
     is_Free = models.BooleanField(default=True)
 
     def __str__(self):

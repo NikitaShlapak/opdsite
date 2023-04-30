@@ -69,18 +69,14 @@ class ProjectRejectForm(forms.Form):
 
 
 class ProjectReportForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['author'].empty_label = 'Автор не указан'
 
     class Meta:
         model = ProjectReport
-        fields = ['heading', 'text', 'file', 'author']
+        fields = ['heading', 'text', 'file']
         widgets = {
             'heading': forms.TextInput(attrs={'class': 'form-control'}),
             'text': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
             'file': forms.FileInput(attrs={'class': 'form-control'}),
-            'author': forms.Select(attrs={'class': 'selectpicker js-states form-control', 'data-live-search': 'true'}),
         }
 
 

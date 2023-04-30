@@ -16,10 +16,12 @@ urlpatterns = [
     path('project/<int:project_id>/reject/', RejectProjectView.as_view(), name='verify_delete'),
     path('project/<int:project_id>/act:<str:action>/', SetProjectStatusView.as_view(), name='set_project_status'),
 
+    path('project/<int:project_id>/reports/add/', views.ReportCreateView.as_view(), name='add_report'),
+
     path('project/<int:project_id>/register/', CreateApplication.as_view(), name='expand'),
     path('project/<int:app_id>/<str:action>/', ConfirmOrDeclineApplication.as_view(), name='apply_or_decline'),
 
-    path('project/<int:project_id>/add_report/', views.AddReport, name='add_report'),
+
 
 
 ]

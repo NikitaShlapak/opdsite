@@ -1,4 +1,5 @@
 import random
+import re
 from datetime import datetime
 
 from django.contrib.auth.models import AbstractUser
@@ -83,7 +84,7 @@ class Applications(models.Model):
 
 class ProjectReport(models.Model):
     heading = models.CharField(max_length=100, verbose_name='Заголовок', default='')
-    # publishing_time = models.DateTimeField('Дата публикации', auto_now_add=True)
+    publishing_time = models.DateTimeField('Дата публикации', auto_now_add=True)
     text = models.TextField('Текст')
     parent_project = models.ForeignKey(Project, verbose_name='Проект', on_delete=models.CASCADE)
     file = models.FileField(upload_to='uploads/files/%Y/%m/%d/', blank=True, verbose_name='Прилагаемый файл')
@@ -96,6 +97,11 @@ class ProjectReport(models.Model):
     def get_absolute_url(self):
         return reverse('project', kwargs={'project_id': self.parent_project.pk})
 
+
+    def get_file_content_type(self):
+        # print(self.file,type(self.file))
+        res = re.sub(r"uploads/files/\d{4}/\d{2}/\d{2}/",'', self.file.name, count=1, flags=0)
+        return res
     class Meta:
         verbose_name = 'Отчёт'
         verbose_name_plural = 'Отчёты'

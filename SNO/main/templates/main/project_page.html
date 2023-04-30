@@ -63,9 +63,13 @@
                           </tbody>
                       </table>
                       <hr>
-                      <h3 class="text">Отчёты:</h3>
-                      <a href="{% url 'add_report' p.pk %}#form" class="btn btn-primary" role="button">Добавить отчёт</a>
 
+                  {% block form %}{% endblock %}
+
+                      <h3 class="text">Отчёты:</h3>
+                  {% if not form %}
+                      <a href="{% url 'add_report' p.pk %}#form" class="btn btn-primary" role="button">Добавить отчёт</a>
+                    {% endif %}
                       {% for r in p.projectreport_set.all %}
                       <div class="card my-3">
                           <div class="card-header">
@@ -91,7 +95,7 @@
                           <div class="card-footer">
                               <a href="{{ r.file.url }}" class="d-flex text-decoration-none align-items-center">
                                   <img src="{% static 'main\images\logos\file_icon.svg' %}" alt="" height="50" width="50">
-                                  <span class="text text-dark fs-4">Прикреплённый файл</span>
+                                  <span class="text text-dark fs-4">{{r.get_file_content_type}}</span>
                               </a>
                           </div>
                           {% endif %}
@@ -204,6 +208,6 @@
     </div>
   </div>
 </div>
-{% block form %}{% endblock %}
+
 
 {% endblock %}

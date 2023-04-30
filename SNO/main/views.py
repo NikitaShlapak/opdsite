@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 from django.views import View
 from django.views.generic import UpdateView, CreateView, DetailView, TemplateView, FormView
 
+from user_accounts.env import MAX_UPLOAD_FILE_SIZE, ALLOWED_CONTENT_TYPES
 from .forms import *
 from .utils import *
 
@@ -142,7 +143,7 @@ class ProjectView(DataMixin, DetailView):
         c_def = self.get_user_context(selected=context['p'].project_type,
                                       desc=context['p'].long_project_description.split('\n'),
                                       reject_form=ProjectRejectForm(),
-                                      applyies=Applications.objects.filter(project__pk=context['p'].pk).order_by('-pk'))
+                                      applyies=Applications.objects.filter(project__pk=context['p'].pk).order_by('pk'))
         context['user'] = self.request.user
         return context | c_def
 
@@ -300,42 +301,59 @@ class RejectProjectView(DataMixin, LoginRequiredMixin, DetailView, FormView):
 
 
 
+class ReportCreateView(DataMixin, LoginRequiredMixin,DetailView, FormView):
+    model = Project
+    pk_url_kwarg = 'project_id'
+    context_object_name = 'p'
 
+    form_class = ProjectReportForm
+    success_url = '/accounts/profile'
 
-def AddReport(request, project_id): # TODO: refactor to class
-    project = Project.objects.get(pk=project_id)
-    get_object_or_404(project)
-    team = CustomUser.objects.filter(current_project=project_id)
+    template_name = 'main/add_coment.html'
+    project=None
 
-    if request.method == 'POST':
-        form = ProjectReportForm(request.POST, request.FILES)
-        if form.is_valid():
-            if form.cleaned_data['author'] in team:
-                data = form.cleaned_data
-                data['parent_project'] = project
-                try:
-                    ProjectReport.objects.create(**data)
-                    return redirect('project', project.pk)
-                except:
-                    form.add_error(None, 'Ошибка добавления отчёта')
-            else:
-                form.add_error(None,
-                               'Указанный участник не может быть автором отчёта, так как не состоит в команде проекта!')
-    else:
-        form = ProjectReportForm()
+    def post(self, request, *args, **kwargs):
+        self.project = get_object_or_404(Project, pk=kwargs['project_id'])
+        self.object = get_object_or_404(Project, pk=kwargs['project_id'])
 
-    group_form = SearchForm()
-    data = {
-        'group_form': group_form,
-        'p': project,
-        'team': team,
-        'selected': project.project_type,
-        'form': form
+        # print('post - ',self.project)
+        return super().post(request,*args, **kwargs)
 
-    }
-    data['title'] = form_title(data['selected'])
-    return render(request, 'main/add_coment.html', data)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(selected=context['p'].project_type,
+                                      desc=context['p'].long_project_description.split('\n'),
+                                      reject_form=ProjectRejectForm(),
+                                      applyies=Applications.objects.filter(project__pk=context['p'].pk).order_by('pk'))
+        context['user'] = self.request.user
+        context = context | c_def
+        return context
 
+    def handle_no_permission(self):
+        return redirect('user_accounts:login')
+
+    def form_valid(self, form):
+        if not (self.request.user in self.project.team.all() or self.project.manager == self.request.user):
+            form.add_error(None, "Вы не можете добавлять отчёты к этому проекту!")
+            self.form_invalid(form)
+        file = form.cleaned_data['file']
+        if file:
+            print(f"{file.name=}, {file.size=}, {file.content_type=}")
+            logging.info(f"{file.name=}, {file.size=}, {file.content_type=}")
+            if not file.content_type in ALLOWED_CONTENT_TYPES:
+                form.add_error('file', 'Недопустимый тип файла. Загружать можно только отчёты и презентации в форматах .pdf, .doc(x), .ppt(x).')
+                return self.form_invalid(form)
+            if file.size > MAX_UPLOAD_FILE_SIZE:
+                form.add_error('file', 'Вы пытаетесь загрузить слишком большой файл! Максимальный размер - 25 Мб.')
+                return self.form_invalid(form)
+        try:
+            report = ProjectReport.objects.create(**form.cleaned_data, author=self.request.user, parent_project=self.project)
+        except:
+            logging.error(f"Can not create report for project {self.project}. User: {self.request.user.username}")
+            return redirect('accounts:profile')
+        else:
+            logging.info(f"Successfully created report {report} by {self.request.user.username}")
+            return redirect('project', self.project.pk)
 
 
 class CreateApplication(DataMixin, LoginRequiredMixin, TemplateView):
