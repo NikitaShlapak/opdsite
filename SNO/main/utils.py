@@ -40,12 +40,14 @@ def form_title(page='main'):
         title = 'Личный кабинет | Profile'
     return title
 
-def find_by_group(all_projects=Project.objects.all(), group='group'):
+def find_by_group(all_projects=Project.objects.all(), search='group'):
+    print(search)
     projects = []
-    for p in all_projects:
-        print(p.target_groups, group, group.upper() == p.target_groups.upper())
-        if group.upper() in p.target_groups.upper():
-            projects.append(p)
+    for project in all_projects:
+        print(project.get_all_target_group_types(), search.upper())
+        if search.upper() in project.get_all_target_group_types().upper():
+            if not project in projects:
+                projects.append(project)
     return projects
 
 def find_by_name(all_projects=Project.objects.all(), data='null'):

@@ -28,7 +28,7 @@ def Main(request):
     if request.GET:
         if 'group' in request.GET:
             group_form = SearchForm({'group': request.GET['group']})
-            projects = find_by_group(all_projects=projects, group=request.GET['group'])
+            projects = find_by_group(all_projects=projects, search=request.GET['group'])
         else:
             group_form = SearchForm()
 
