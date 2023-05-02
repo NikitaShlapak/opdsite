@@ -103,6 +103,22 @@ def Info(request):
     return render(request, 'main/info.html', context=data)
 
 
+class ProjectView(DataMixin, DetailView):
+    template_name = 'main/project_page.html'
+    model = Project
+    pk_url_kwarg = 'project_id'
+    context_object_name = 'p'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(selected=context['p'].project_type,
+                                      desc=context['p'].long_project_description.split('\n'),
+                                      reject_form=ProjectRejectForm(),
+                                      applyies=Applications.objects.filter(project__pk=context['p'].pk).order_by('pk'))
+        context['user'] = self.request.user
+        return context | c_def
+
+
+
 class ProjectCreationView(DataMixin, LoginRequiredMixin, CreateView):
     form_class = ProjectCreationForm
     template_name = "main/add_project.html"
@@ -131,25 +147,6 @@ class ProjectCreationView(DataMixin, LoginRequiredMixin, CreateView):
             else:
                 form.add_error(None, 'Длинное описание проекта не может быть короче краткого!')
         return render(request, self.template_name, context={'form':form})
-
-
-class ProjectView(DataMixin, DetailView):
-    template_name = 'main/project_page.html'
-    model = Project
-    pk_url_kwarg = 'project_id'
-    context_object_name = 'p'
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(selected=context['p'].project_type,
-                                      desc=context['p'].long_project_description.split('\n'),
-                                      reject_form=ProjectRejectForm(),
-                                      applyies=Applications.objects.filter(project__pk=context['p'].pk).order_by('pk'))
-        context['user'] = self.request.user
-        return context | c_def
-
-
-
-
 
 
 class ProjectUpdateView(DataMixin, LoginRequiredMixin, UpdateView):
@@ -301,60 +298,6 @@ class RejectProjectView(DataMixin, LoginRequiredMixin, DetailView, FormView):
 
 
 
-class ReportCreateView(DataMixin, LoginRequiredMixin,DetailView, FormView):
-    model = Project
-    pk_url_kwarg = 'project_id'
-    context_object_name = 'p'
-
-    form_class = ProjectReportForm
-    success_url = '/accounts/profile'
-
-    template_name = 'main/add_coment.html'
-    project=None
-
-    def post(self, request, *args, **kwargs):
-        self.project = get_object_or_404(Project, pk=kwargs['project_id'])
-        self.object = get_object_or_404(Project, pk=kwargs['project_id'])
-
-        # print('post - ',self.project)
-        return super().post(request,*args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(selected=context['p'].project_type,
-                                      desc=context['p'].long_project_description.split('\n'),
-                                      reject_form=ProjectRejectForm(),
-                                      applyies=Applications.objects.filter(project__pk=context['p'].pk).order_by('pk'))
-        context['user'] = self.request.user
-        context = context | c_def
-        return context
-
-    def handle_no_permission(self):
-        return redirect('user_accounts:login')
-
-    def form_valid(self, form):
-        if not (self.request.user in self.project.team.all() or self.project.manager == self.request.user):
-            form.add_error(None, "Вы не можете добавлять отчёты к этому проекту!")
-            self.form_invalid(form)
-        file = form.cleaned_data['file']
-        if file:
-            print(f"{file.name=}, {file.size=}, {file.content_type=}")
-            logging.info(f"{file.name=}, {file.size=}, {file.content_type=}")
-            if not file.content_type in ALLOWED_CONTENT_TYPES:
-                form.add_error('file', 'Недопустимый тип файла. Загружать можно только отчёты и презентации в форматах .pdf, .doc(x), .ppt(x).')
-                return self.form_invalid(form)
-            if file.size > MAX_UPLOAD_FILE_SIZE:
-                form.add_error('file', 'Вы пытаетесь загрузить слишком большой файл! Максимальный размер - 25 Мб.')
-                return self.form_invalid(form)
-        try:
-            report = ProjectReport.objects.create(**form.cleaned_data, author=self.request.user, parent_project=self.project)
-        except:
-            logging.error(f"Can not create report for project {self.project}. User: {self.request.user.username}")
-            return redirect('accounts:profile')
-        else:
-            logging.info(f"Successfully created report {report} by {self.request.user.username}")
-            return redirect('project', self.project.pk)
-
 
 class CreateApplication(DataMixin, LoginRequiredMixin, TemplateView):
     template_name = 'main/add_user.html'
@@ -443,5 +386,59 @@ class ConfirmOrDeclineApplication(DataMixin,LoginRequiredMixin,TemplateView):
         return redirect('user_accounts:profile')
 
 
+
+class ReportCreateView(DataMixin, LoginRequiredMixin,DetailView, FormView):
+    model = Project
+    pk_url_kwarg = 'project_id'
+    context_object_name = 'p'
+
+    form_class = ProjectReportForm
+    success_url = '/accounts/profile'
+
+    template_name = 'main/add_coment.html'
+    project=None
+
+    def post(self, request, *args, **kwargs):
+        self.project = get_object_or_404(Project, pk=kwargs['project_id'])
+        self.object = get_object_or_404(Project, pk=kwargs['project_id'])
+
+        # print('post - ',self.project)
+        return super().post(request,*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(selected=context['p'].project_type,
+                                      desc=context['p'].long_project_description.split('\n'),
+                                      reject_form=ProjectRejectForm(),
+                                      applyies=Applications.objects.filter(project__pk=context['p'].pk).order_by('pk'))
+        context['user'] = self.request.user
+        context = context | c_def
+        return context
+
+    def handle_no_permission(self):
+        return redirect('user_accounts:login')
+
+    def form_valid(self, form):
+        if not (self.request.user in self.project.team.all() or self.project.manager == self.request.user):
+            form.add_error(None, "Вы не можете добавлять отчёты к этому проекту!")
+            self.form_invalid(form)
+        file = form.cleaned_data['file']
+        if file:
+            print(f"{file.name=}, {file.size=}, {file.content_type=}")
+            logging.info(f"{file.name=}, {file.size=}, {file.content_type=}")
+            if not file.content_type in ALLOWED_CONTENT_TYPES:
+                form.add_error('file', 'Недопустимый тип файла. Загружать можно только отчёты и презентации в форматах .pdf, .doc(x), .ppt(x).')
+                return self.form_invalid(form)
+            if file.size > MAX_UPLOAD_FILE_SIZE:
+                form.add_error('file', 'Вы пытаетесь загрузить слишком большой файл! Максимальный размер - 25 Мб.')
+                return self.form_invalid(form)
+        try:
+            report = ProjectReport.objects.create(**form.cleaned_data, author=self.request.user, parent_project=self.project)
+        except:
+            logging.error(f"Can not create report for project {self.project}. User: {self.request.user.username}")
+            return redirect('accounts:profile')
+        else:
+            logging.info(f"Successfully created report {report} by {self.request.user.username}")
+            return redirect('project', self.project.pk)
 
 

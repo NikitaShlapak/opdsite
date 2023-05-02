@@ -69,9 +69,21 @@ class ProjectReportAdmin(admin.ModelAdmin):
     search_fields = ('parent_project', 'author', 'text')
     sortable_by = ('parent_project','author')
 
+class ProjectReportMarkAdmin(admin.ModelAdmin):
+    list_display = ('author','related_report',   'creation_time',  'value')
+    list_display_links = ('author',  'related_report')
+    list_filter = ('author', 'related_report__parent_project',)
+    list_editable = ('value',)
+
+    search_fields = ('author__username','author__first_name','author__last_name', 'related_report__heading','related_report__parent_project__name_of_project')
+    search_help_text = 'Введите часть логина, имени или фамилии преподавателя, названия проекта или заголовка отчёта'
+
+    sortable_by = ('author',  'related_report__heading', 'creation_time',  'value')
 
 
 
+
+admin.site.register(ProjectReportMark, ProjectReportMarkAdmin)
 admin.site.register(Applications, ApplicationsAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectReport, ProjectReportAdmin)

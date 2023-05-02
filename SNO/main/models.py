@@ -1,8 +1,5 @@
 import random
 import re
-from datetime import datetime
-
-from django.contrib.auth.models import AbstractUser
 
 from django.db import models
 from django.urls import reverse
@@ -43,7 +40,7 @@ class Project(models.Model):
         REJECTED = 'rejected', 'Проект отклонён'
 
     project_status = models.CharField(max_length=15, choices=ProjectStatus.choices, default=ProjectStatus.UNDERREVIEW, verbose_name='Статус проекта' )
-    team = models.ManyToManyField(CustomUser, verbose_name='Команда', null=True)
+    team = models.ManyToManyField(CustomUser, verbose_name='Команда', blank=True)
 
     short_project_description = models.CharField('Краткое описание проекта', max_length=150)
     long_project_description = models.TextField('Полное описание проекта')
@@ -97,6 +94,8 @@ class ProjectReport(models.Model):
     def get_absolute_url(self):
         return reverse('project', kwargs={'project_id': self.parent_project.pk})
 
+    def test(self, text):
+        return text
 
     def get_file_content_type(self):
         # print(self.file,type(self.file))
@@ -106,3 +105,21 @@ class ProjectReport(models.Model):
         verbose_name = 'Отчёт'
         verbose_name_plural = 'Отчёты'
 
+
+class ProjectReportMark(models.Model):
+    related_report = models.ForeignKey(ProjectReport, verbose_name='Отчёт', on_delete=models.CASCADE)
+    author=models.ForeignKey(CustomUser, verbose_name='Преподаватель',
+                                         on_delete=models.SET_NULL,
+                                         null=True,
+                                         limit_choices_to={'study_group__type':StudyGroup.StudyGroupType.TEACHER})
+    creation_time = models.DateTimeField('Дата', auto_now_add=True)
+    comment = models.CharField(max_length=250,verbose_name='Комментарий', null=True, blank=True)
+    value = models.SmallIntegerField(verbose_name='Балл')
+
+    def __str__(self):
+        return f"Оценка пользователя {self.author.username} к отчёту {self.related_report}."
+
+
+    class Meta:
+        verbose_name = 'Оценка'
+        verbose_name_plural = 'Оценки'

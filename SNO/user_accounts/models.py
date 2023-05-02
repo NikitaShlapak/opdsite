@@ -4,8 +4,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-
-
 class StudyGroup(models.Model):
     related_teacher = models.ForeignKey('CustomUser', verbose_name='Преподаватель', on_delete=models.SET_NULL, null=True)
 
@@ -31,7 +29,7 @@ class StudyGroup(models.Model):
         TEACHER = 'Преподаватель', 'Преподаватель'
         OUTSIDER = 'Внешний менеджер', 'Внешний менеджер'
 
-    type = models.CharField(max_length=50, verbose_name='Тип группы',choices=StudyGroupType.choices, default=StudyGroupType.TEACHER)
+    type = models.CharField(max_length=50, verbose_name='Тип группы',choices=StudyGroupType.choices, default=StudyGroupType.OUTSIDER)
 
     year = models.SmallIntegerField(verbose_name='год поступления', default=datetime.today().year)
     subgroup = models.SmallIntegerField(default=0, verbose_name='Подгруппа')
