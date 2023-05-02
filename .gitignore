@@ -1,6 +1,6 @@
-SNO/*/env.py
+SNO/SNO/env.py
 media/
-SNO/*/migrations/
+SNO/*/migrations/0*
 
 
 
