@@ -1,6 +1,6 @@
 SNO/SNO/env.py
 media
-SNO/main/migrations
+SNO/*/migrations
 
 
 

@@ -1,6 +1,6 @@
 from django.core.mail import send_mail
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import UpdateView
 
 from .models import *
@@ -376,7 +376,11 @@ def reject_project(request, project_id):
     }
     return render(request, 'main/edit_project.html', context=data)
 
-
+def confirm_project(request, **kwargs):
+    project = get_object_or_404(Project, pk=kwargs['project_id'],edition_key=kwargs['edition_key'])
+    project.project_status=Project.ProjectStatus.ENROLLMENTOPENED
+    project.save()
+    return redirect('project', project.pk)
 
 class ProjectUpdateView(UpdateView):
     model = Project

@@ -29,6 +29,8 @@
             {% if request.user.is_staff and p.project_status == 'under_review' or p.project_status == 'rejected' %}
             <br>
             <a role="button" class="btn btn-danger w-100 mt-2" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">Отклонить</a>
+            <br>
+            <a role="button" href="{% url 'confirm_project' p.pk p.edition_key %}" class="btn btn-success w-100 mt-2" >Одобрить</a>
             {% endif %}
 
         </div>
