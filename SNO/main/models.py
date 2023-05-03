@@ -62,6 +62,13 @@ class Project(models.Model):
                 res.append(gr.type)
         return ', '.join(res)
 
+    def get_all_target_group_types_list(self):
+        res = []
+        for gr in self.target_groups.all():
+            if not gr.type in res:
+                res.append(gr.type)
+        return res
+
     class Meta:
         verbose_name = 'Проект'
         verbose_name_plural = 'Проекты'
@@ -94,8 +101,12 @@ class ProjectReport(models.Model):
     def get_absolute_url(self):
         return reverse('project', kwargs={'project_id': self.parent_project.pk})
 
-    def test(self, text):
-        return text
+    def get_average_mark(self):
+        all_marks = self.projectreportmark_set.all()
+        average_mark = 0
+        for mark in all_marks:
+            average_mark = average_mark + mark.value/len(all_marks)
+        return average_mark
 
     def get_file_content_type(self):
         # print(self.file,type(self.file))

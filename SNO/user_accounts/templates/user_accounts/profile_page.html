@@ -5,12 +5,24 @@
 
 {% block body %}
 <h1>{{ title }}</h1>
+<hr>
+<h3>{{ user.username }} ({{ user.get_full_name }}) <br> Группа: {{ user.study_group }}</h3>
+        {% if user.is_approved %}
+<hr>
+<div class="row mb-3">
+  <div class="col-auto ">
+      <img src="{% static 'main\images\ok.svg' %}" alt="is_approved" height="30px">
+  </div>
+  <div class="col ">
+       <h4 class="text text-primary my-0 "><i>Проверенный менеджер</i></h4>
+  </div>
+</div>
+<hr>
 
-{{ user.username }} profile page
 
-<h3>Группа: {{ user.study_group }}</h3>
+            {% endif %}
 
-{{ user }}
+
 
 {% if my_applies or managed_applies or managed_projects or projects %}
 {% if my_applies %}

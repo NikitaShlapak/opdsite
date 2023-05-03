@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 from django.views import View
 from django.views.generic import UpdateView, CreateView, DetailView, TemplateView, FormView
 
-from user_accounts.env import MAX_UPLOAD_FILE_SIZE, ALLOWED_CONTENT_TYPES
+from .env import MAX_UPLOAD_FILE_SIZE, ALLOWED_CONTENT_TYPES
 from .forms import *
 from .utils import *
 
@@ -110,11 +110,28 @@ class ProjectView(DataMixin, DetailView):
     context_object_name = 'p'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(selected=context['p'].project_type,
-                                      desc=context['p'].long_project_description.split('\n'),
+        project = context['p']
+        user = self.request.user
+        reports_marked=[]
+        for report in project.projectreport_set.all():
+            mark = []
+            try:
+                marks = report.projectreportmark_set.filter(author=user)
+                mark = marks[0]
+            except:
+                pass
+
+            reports_marked.append({'report':report, 'mark':mark})
+
+            # print(report,report.get_average_mark(), )
+        print(reports_marked)
+        c_def = self.get_user_context(selected=project.project_type,
+                                      desc=project.long_project_description.split('\n'),
                                       reject_form=ProjectRejectForm(),
-                                      applyies=Applications.objects.filter(project__pk=context['p'].pk).order_by('pk'))
-        context['user'] = self.request.user
+                                      applyies=Applications.objects.filter(project__pk=project.pk).order_by('pk'),
+                                      reports=reports_marked,
+                                      reports_markable=user_can_mark_reports(user,project))
+        context['user'] = user
         return context | c_def
 
 

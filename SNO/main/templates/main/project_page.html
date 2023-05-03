@@ -70,7 +70,7 @@
                   {% if not form %}
                       <a href="{% url 'add_report' p.pk %}#form" class="btn btn-primary" role="button">Добавить отчёт</a>
                     {% endif %}
-                      {% for r in p.projectreport_set.all %}
+                      {% for r in reports %}
 
                   <div class="row">
                       <div class="card my-3 p-0 col">
@@ -78,41 +78,48 @@
                               <div class="row">
                                   <div class="col-6">
                                       <h5 class="text text-start">
-                                      {{ r.author }}
+                                      {{ r.report.author }}
                                       </h5>
                                   </div>
                                   <div class="col-6">
                                       <h5 class="text text-end">
-                                      {{ r.publishing_time }}
+                                      {{ r.report.publishing_time }}
                                       </h5>
                                   </div>
                               </div>
                           </div>
                           <div class="card-body">
-                             <h4>{{ r.heading }}</h4>
+                             <h4>{{ r.report.heading }}</h4>
                               <hr>
-                              <p>{{ r.text }}</p>
+                              <p>{{ r.report.text }}</p>
 
                           {% if r.file %}
                               <hr>
                               <a href="{{ r.file.url }}" class="d-flex text-decoration-none align-items-center">
                                   <img src="{% static 'main\images\logos\file_icon.svg' %}" alt="" height="50" width="50">
-                                  <span class="text text-dark fs-4">{{r.get_file_content_type}}</span>
+                                  <span class="text text-dark fs-4">{{r.report.get_file_content_type}}</span>
                               </a>
 
                           {% endif %}
                           </div>
                           <div class="card-footer">
-                              <h3>Оценка: | Всего оценок:</h3>
+                              <div class="row">
+                                  <div class="col text-start">
+                                      <h4>Оценка: {{ r.report.get_average_mark }}</h4>
+                                  </div>
+                                  <div class="col text-end">
+                                      <h4>Всего оценок: {{ r.report.projectreportmark_set.count }}</h4>
+                                  </div>
+                              </div>
                           </div>
                       </div>
-
+                        {% if reports_markable %}
                       <div class="card p-0 my-3 mx-2 col-auto">
                           <div class="card-header">
                               <h5 class="text-center">Моя оценка</h5>
                           </div>
                           <div class="card-body pt-4">
-                              <h1 class="text-center">111</h1>
+                              <h1 class="text-center">{{ r.mark.value }}</h1>
                               <p class="text-center">{{r.publishing_time|date}}</p>
                                 <p>{{ r.test }}</p>
                           </div>
@@ -120,7 +127,7 @@
                               <a href="" role="button"class="btn btn-primary">Изменить оценку</a>
                           </div>
                       </div>
-
+                        {% endif %}
                       </div>
                       {% endfor %}
 

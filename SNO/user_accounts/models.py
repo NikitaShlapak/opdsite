@@ -72,4 +72,6 @@ class CustomUser(AbstractUser):
     is_Free = models.BooleanField(default=True)
 
     def __str__(self):
+        if not self.get_full_name():
+            return self.username
         return f"{self.get_full_name()} ({self.study_group})"

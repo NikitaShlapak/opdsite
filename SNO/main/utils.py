@@ -64,3 +64,18 @@ def generate_edition_key():
         generate_edition_key()
     else:
         return key
+
+def user_can_mark_reports(user:CustomUser, project:Project):
+    if not user.is_authenticated:
+        return False
+    if not user.is_superuser:
+        if not user.study_group.type == StudyGroup.StudyGroupType.TEACHER:
+            return False
+        else:
+            group_match = False
+            for user_group in user.studygrop_set.all():
+                if user_group.type in project.get_all_target_group_types_list():
+                    group_match = True
+            if not group_match:
+                return False
+    return True
