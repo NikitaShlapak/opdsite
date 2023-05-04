@@ -70,18 +70,35 @@ class ProjectReportAdmin(admin.ModelAdmin):
     sortable_by = ('parent_project','author')
 
 class ProjectReportMarkAdmin(admin.ModelAdmin):
-    list_display = ('author','related_report',   'creation_time',  'value')
-    list_display_links = ('author',  'related_report')
-    list_filter = ('author', 'related_report__parent_project',)
-    list_editable = ('value',)
 
-    search_fields = ('author__username','author__first_name','author__last_name', 'related_report__heading','related_report__parent_project__name_of_project')
+    def get_parent_project(self, object):
+        return object.related_report.parent_project.name_of_project
+
+    get_parent_project.short_description = "Проект"
+    readonly_fields = ('get_parent_project',)
+    list_display = ('get_parent_project','related_report','value','author','creation_time',  )
+    list_display_links = ('get_parent_project', 'author',  'related_report')
+
+    fieldsets = (
+        ('Основное',
+         {"fields": ("get_parent_project", "related_report")}
+         ),
+        ("Оценка",
+         {"fields": ("value", "author",)}
+         ),
+        ("Прочее",
+         {"fields": ("creation_time", )}
+         )
+    )
+    readonly_fields = ('get_parent_project', 'related_report','creation_time')
+
+    search_fields = ('author__username', 'author__first_name', 'author__last_name', 'related_report__heading',
+                     'related_report__parent_project__name_of_project')
     search_help_text = 'Введите часть логина, имени или фамилии преподавателя, названия проекта или заголовка отчёта'
 
-    sortable_by = ('author',  'related_report__heading', 'creation_time',  'value')
-
-
-
+    sortable_by = ('get_parent_project', 'author', 'related_report', 'creation_time', 'value', 'get_parent_project')
+    list_filter = ('author', 'related_report', )
+    list_editable = ('value',)
 
 admin.site.register(ProjectReportMark, ProjectReportMarkAdmin)
 admin.site.register(Applications, ApplicationsAdmin)

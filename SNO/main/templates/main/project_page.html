@@ -113,21 +113,35 @@
                               </div>
                           </div>
                       </div>
+
                         {% if reports_markable %}
-                      <div class="card p-0 my-3 mx-2 col-auto">
+                    {% if r.report.is_markable %}
+                      <div class="card p-0 my-3 mx-2 col-auto" style="max-width: 500px">
                           <div class="card-header">
                               <h5 class="text-center">Моя оценка</h5>
                           </div>
+
+                          {% if r.mark %}
                           <div class="card-body pt-4">
                               <h1 class="text-center">{{ r.mark.value }}</h1>
-                              <p class="text-center">{{r.publishing_time|date}}</p>
-                                <p>{{ r.test }}</p>
+                              <p class="text-center">{{r.mark.creation_time|date}}</p>
                           </div>
                           <div class="card-footer">
                               <a href="" role="button"class="btn btn-primary">Изменить оценку</a>
                           </div>
+                          {% else %}
+                          <div class="card-body pt-4">
+                              <h1 class="text-center">-</h1>
+                              <p class="text-center">Вы ещё не оценили <br> этот отчёт</p>
+                          </div>
+                          <div class="card-footer">
+                              <a href="" role="button"class="btn btn-success w-100 text-center">Оценить</a>
+                          </div>
+                          {% endif %}
                       </div>
-                        {% endif %}
+                      {% endif %}
+                      {% endif %}
+
                       </div>
                       {% endfor %}
 

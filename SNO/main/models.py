@@ -96,16 +96,25 @@ class ProjectReport(models.Model):
     author = models.ForeignKey(CustomUser, verbose_name='Автор', on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.parent_project}/{self.heading}"
+        return f"{self.parent_project} - {self.heading}"
 
     def get_absolute_url(self):
         return reverse('project', kwargs={'project_id': self.parent_project.pk})
 
+    def is_markable(self):
+        if not (self.author.study_group.type == StudyGroup.StudyGroupType.TEACHER or self.author.study_group.type == StudyGroup.StudyGroupType.OUTSIDER):
+            return True
+        else:
+            return False
+            # return f"{self.author.study_group.type} - {StudyGroup.StudyGroupType.TEACHER} - {self.author.study_group.type == StudyGroup.StudyGroupType.TEACHER}"
+
     def get_average_mark(self):
-        all_marks = self.projectreportmark_set.all()
         average_mark = 0
-        for mark in all_marks:
-            average_mark = average_mark + mark.value/len(all_marks)
+        if self.is_markable():
+            all_marks = self.projectreportmark_set.all()
+            if len(all_marks) > 0:
+                for mark in all_marks:
+                    average_mark = average_mark + mark.value/len(all_marks)
         return average_mark
 
     def get_file_content_type(self):
