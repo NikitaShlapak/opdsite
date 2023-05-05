@@ -102,16 +102,25 @@
 
                           {% endif %}
                           </div>
+                          {% if r.report.projectreportmark_set.count %}
                           <div class="card-footer">
                               <div class="row">
                                   <div class="col text-start">
-                                      <h4>Оценка: {{ r.report.get_average_mark }}</h4>
+                                      <h4>
+                                          Оценка:
+                                          <u class="
+                                      {% if r.report.get_average_mark < 60 %} text-danger
+                                      {% elif r.report.get_average_mark < 70 %} text-secondary
+                                      {% elif r.report.get_average_mark < 90 %} text-primary
+                                      {% else %} text-success {% endif %}">{{ r.report.get_average_mark }}</u>
+                                      </h4>
                                   </div>
                                   <div class="col text-end">
                                       <h4>Всего оценок: {{ r.report.projectreportmark_set.count }}</h4>
                                   </div>
                               </div>
                           </div>
+                          {% endif %}
                       </div>
 
                         {% if reports_markable %}
@@ -123,11 +132,14 @@
 
                           {% if r.mark %}
                           <div class="card-body pt-4">
-                              <h1 class="text-center">{{ r.mark.value }}</h1>
+                              <h1 class="text-center
+{% if r.mark.value < 60 %} text-danger {% elif r.mark.value < 70 %} text-secondary {% elif r.mark.value < 90 %} text-primary {% else %} text-success {% endif %}">
+                                  {{ r.mark.value }}
+                              </h1>
                               <p class="text-center">{{r.mark.creation_time|date}}</p>
                           </div>
                           <div class="card-footer">
-                              <a href="" role="button"class="btn btn-primary">Изменить оценку</a>
+                              <a href="{% url 'create_mark' r.report.pk %}" role="button"class="btn btn-primary">Изменить оценку</a>
                           </div>
                           {% else %}
                           <div class="card-body pt-4">
@@ -135,7 +147,7 @@
                               <p class="text-center">Вы ещё не оценили <br> этот отчёт</p>
                           </div>
                           <div class="card-footer">
-                              <a href="" role="button"class="btn btn-success w-100 text-center">Оценить</a>
+                              <a href="{% url 'create_mark' r.report.pk %}" role="button"class="btn btn-success w-100 text-center">Оценить</a>
                           </div>
                           {% endif %}
                       </div>

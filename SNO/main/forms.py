@@ -96,3 +96,14 @@ class SearchNameForm(forms.Form):
     name = forms.CharField(max_length=128, widget=forms.TextInput(attrs={'class': 'form-control',
                                                                          'placeholder': "Введите часть названия или фамилии куратора",
                                                                          'aria-describedby': "button-addon2"}))
+
+
+class ProjectReporkMarkingForm(forms.ModelForm):
+    class Meta:
+        model = ProjectReportMark
+        fields = ['value', 'comment']
+
+        widgets = {
+            'value': forms.NumberInput(attrs={'class': 'form-control'}),
+            'comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+        }

@@ -2,6 +2,7 @@ import random
 import re
 
 from django.db import models
+from django.db.models import Q
 from django.urls import reverse
 
 from user_accounts.models import CustomUser, StudyGroup
@@ -22,7 +23,7 @@ class Project(models.Model):
                                 max_length=50, related_name='manager',
                                 limit_choices_to={'is_Free': True})
 
-    target_groups = models.ManyToManyField(StudyGroup, verbose_name='Учебные группы исполнителей')
+    target_groups = models.ManyToManyField(StudyGroup, verbose_name='Учебные группы исполнителей',limit_choices_to=~Q(type__in=[StudyGroup.StudyGroupType.TEACHER,StudyGroup.StudyGroupType.OUTSIDER]))
 
 
     class ImplementationPeriod(models.TextChoices):
@@ -139,7 +140,8 @@ class ProjectReportMark(models.Model):
     def __str__(self):
         return f"Оценка пользователя {self.author.username} к отчёту {self.related_report}."
 
-
+    def get_absolute_url(self):
+        return self.related_report.get_absolute_url()
     class Meta:
         verbose_name = 'Оценка'
         verbose_name_plural = 'Оценки'

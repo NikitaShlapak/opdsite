@@ -1,8 +1,8 @@
 from django.urls import path
 from . import views
 from .views import ConfirmOrDeclineApplication, ProjectUpdateView, \
-    CreateApplication, ProjectView, ProjectCreationView, RejectProjectView,  \
-    SetProjectStatusView
+    CreateApplication, ProjectView, ProjectCreationView, RejectProjectView, \
+    SetProjectStatusView, ProjectReportMarkUpdateView
 
 urlpatterns = [
     path('', views.Main, name='MAIN'),
@@ -20,6 +20,8 @@ urlpatterns = [
 
     path('project/<int:project_id>/register/', CreateApplication.as_view(), name='expand'),
     path('project/<int:app_id>/<str:action>/', ConfirmOrDeclineApplication.as_view(), name='apply_or_decline'),
+
+    path('project/report/<int:project_report_id>/mark', ProjectReportMarkUpdateView.as_view(), name='create_mark')
 
 
 

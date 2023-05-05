@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
+from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import UpdateView, CreateView, DetailView, TemplateView, FormView
 
@@ -441,7 +442,7 @@ class ReportCreateView(DataMixin, LoginRequiredMixin,DetailView, FormView):
             self.form_invalid(form)
         file = form.cleaned_data['file']
         if file:
-            print(f"{file.name=}, {file.size=}, {file.content_type=}")
+            # print(f"{file.name=}, {file.size=}, {file.content_type=}")
             logging.info(f"{file.name=}, {file.size=}, {file.content_type=}")
             if not file.content_type in ALLOWED_CONTENT_TYPES:
                 form.add_error('file', 'Недопустимый тип файла. Загружать можно только отчёты и презентации в форматах .pdf, .doc(x), .ppt(x).')
@@ -459,3 +460,54 @@ class ReportCreateView(DataMixin, LoginRequiredMixin,DetailView, FormView):
             return redirect('project', self.project.pk)
 
 
+
+class ProjectReportMarkUpdateView(DataMixin, LoginRequiredMixin, FormView):
+    model = ProjectReportMark
+    template_name = 'main/marking.html'
+    context_object_name = 'r'
+    form_class = ProjectReporkMarkingForm
+    success_url = '/accounts/profile'
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(selected='marking', **{self.context_object_name:self.object.related_report,
+                                                           'form':self.form_class(),
+                                                           'p':self.object.related_report.parent_project,
+                                                           'mark':self.object})
+        context[self.context_object_name]=self.object.related_report
+        context = context | c_def
+        return context
+
+    def handle_no_permission(self):
+        return redirect('user_accounts:login')
+
+
+    def post(self, request, *args, **kwargs):
+        report = get_object_or_404(ProjectReport, pk=kwargs['project_report_id'])
+        self.object,created= ProjectReportMark.objects.get_or_create(author=request.user, related_report=report, defaults={'value':0})
+        return super().post(request,*args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        report = get_object_or_404(ProjectReport, pk=kwargs['project_report_id'])
+        self.object, created = ProjectReportMark.objects.get_or_create(author=request.user, related_report=report, defaults={'value':0})
+        return render(request,self.template_name, context={self.context_object_name:self.object.related_report,
+                                                           'form':self.form_class(),
+                                                           'p':self.object.related_report.parent_project,
+                                                           'mark':self.object})
+        
+    def form_valid(self, form):
+        data = form.cleaned_data
+        if data['value']>100 or data['value']<1:
+            form.add_error('value', 'Оценка не может быть ниже 1 или выше 100 баллов!')
+            print('value error', form.errors)
+            return self.form_invalid(form)
+        else:
+            self.object.value = data['value']
+            try:
+                self.object.save()
+            except:
+                logging.error(f"Can not save report mark for report {self.object}. User: {self.request.user.username}")
+            else:
+                logging.info(f"Succesfully saved report mark {self.object}. User: {self.request.user.username}. Value - {self.object.value} ")
+            return redirect(self.object.get_absolute_url())

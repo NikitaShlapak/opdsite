@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block body %}
+
+
+
+<div class="card w-100 my-3 ">
+  <div class="card-header">
+    <div class="row">
+    <div class="col-10">
+
+      <h3 class="mb-0">
+        {% if p.is_approved %}
+        <a  data-bs-toggle="tooltip" data-bs-placement="top"
+                                    data-bs-custom-class="custom-tooltip"
+                                    data-bs-title="This top tooltip is themed via CSS variables."><img src="{% static 'main\images\ok.svg' %}" alt="is_approved" height="50px"></a>
+        {% endif %}
+    {{ p.name_of_project }}
+    </h3>
+       {% if p.is_approved %}
+            <p class="text text-primary my-0"><i>проект с проверенным менеджером</i></p>
+            {% endif %}
+    </div>
+    <div class="col">
+      <p class="text text-end"><i>
+        {{p.date_create}}</i>
+      </p>
+    </div>
+</div>
+  </div>
+  <a href="{% url 'project' p.pk %}"><img src=" {{ p.poster.url }} " class="card-img-top" alt="{{ p.poster.url }}" height="300em" style="object-fit:cover"></a>
+  <div class="card-body">
+    <h4>Куратор: {{ p.manager.get_full_name }}</h4>
+    <h4 class="card-title">Тип проекта: {{ p.get_project_type_display }}</h4>
+  </div>
+  <div class="card-footer d-flex justify-content-evenly">
+    <a href="{% url 'project' p.pk %}" class="btn btn-primary me-2 w-25">Страница проекта</a>
+  </div>
+</div>
+
+                <div class="row">
+                      <div class="card my-3 p-0 col">
+                          <div class="card-header">
+                              <div class="row">
+                                  <div class="col-6">
+                                      <h5 class="text text-start">
+                                      {{ r.author }}
+                                      </h5>
+                                  </div>
+                                  <div class="col-6">
+                                      <h5 class="text text-end">
+                                      {{ r.publishing_time }}
+                                      </h5>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="card-body">
+                             <h4>{{ r.heading }}</h4>
+                              <hr>
+                              <p>{{ r.text }}</p>
+
+                          {% if r.file %}
+                              <hr>
+                              <a href="{{ r.file.url }}" class="d-flex text-decoration-none align-items-center">
+                                  <img src="{% static 'main\images\logos\file_icon.svg' %}" alt="" height="50" width="50">
+                                  <span class="text text-dark fs-4">{{r.get_file_content_type}}</span>
+                              </a>
+
+                          {% endif %}
+                          </div>
+                          <div class="card-footer">
+                              <div class="row">
+                                  <div class="col text-start">
+                                      <h4>Оценка: {{ r.get_average_mark }}</h4>
+                                  </div>
+                                  <div class="col text-end">
+                                      <h4>Всего оценок: {{ r.projectreportmark_set.count }}</h4>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+
+
+                      <div class="card p-0 my-3 mx-2 col-auto" style="max-width: 500px">
+                          <div class="card-header">
+                              <h5 class="text-center">Моя оценка</h5>
+                          </div>
+
+                          {% if mark.value %}
+                          <div class="card-body pt-4">
+                              <h1 class="text-center">{{ mark.value }}</h1>
+                              <p class="text-center">{{mark.creation_time|date}}</p>
+                          </div>
+
+                          {% else %}
+                          <div class="card-body pt-4">
+                              <h1 class="text-center">-</h1>
+                              <p class="text-center">Вы ещё не оценили <br> этот отчёт</p>
+                          </div>
+
+                          {% endif %}
+                      </div>
+
+
+                      </div>
+  <form action="{%  url 'create_mark' r.pk  %}" method="post">
+<div class="card row">
+
+        {% csrf_token %}
+
+        <div class="card-header">
+            <div class="row">
+                <div class="col-auto">
+                   <h3><label for="{{ form.value.id_for_label }}" class="form-label text text-wrap">Новая оценка:</label></h3>
+
+                </div>
+                <div class="col" style="max-width:200px">
+                    {{ form.value }}
+                </div>
+                <div class="col">
+                    <button type="submit" class="btn btn-success">Подвердить</button>
+                </div>
+            </div>
+
+             <p class="text-danger">{{ form.value.errors }}</p>
+
+        </div>
+        <div class="card-body">
+            <label for="{{ form.comment.id_for_label }}" class="form-label text text-wrap">{{ form.comment.label }} (необязательно):</label>
+            {{ form.comment }}
+        </div>
+
+</div>
+ </form>
+
+{% endblock %}

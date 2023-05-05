@@ -38,13 +38,15 @@ def form_title(page='main'):
         title = 'Вход | Login'
     if page == 'profile':
         title = 'Личный кабинет | Profile'
+    if page == 'marking':
+        title = 'Оценка отчёта | Report marking'
     return title
 
 def find_by_group(all_projects=Project.objects.all(), search='group'):
-    print(search)
+    # print(search)
     projects = []
     for project in all_projects:
-        print(project.get_all_target_group_types(), search.upper())
+        # print(project.get_all_target_group_types(), search.upper())
         if search.upper() in project.get_all_target_group_types().upper():
             if not project in projects:
                 projects.append(project)
@@ -53,7 +55,7 @@ def find_by_group(all_projects=Project.objects.all(), search='group'):
 def find_by_name(all_projects=Project.objects.all(), data='null'):
     projects = []
     for p in all_projects:
-        print(p.name_of_project, p.manager.get_full_name, data)
+        # print(p.name_of_project, p.manager.get_full_name, data)
         if data.upper() in p.name_of_project.upper() or data.upper() in p.manager.get_full_name().upper():
             projects.append(p)
     return projects
