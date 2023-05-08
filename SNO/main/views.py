@@ -157,11 +157,14 @@ class ProjectCreationView(DataMixin, LoginRequiredMixin, CreateView):
                                                 **form.cleaned_data)
                     for group in groups:
                         pr.target_groups.add(group)
+                    if request.user.is_approved:
+                        pr.project_status = Project.ProjectStatus.ENROLLMENTOPENED
                     pr.save()
-                    logging.info(f"Successfully created project {pr}. Manager - {request.user}")
-                    return redirect('project', pr.pk)
                 except:
                     form.add_error(None, 'Ошибка регистрации проекта')
+                else:
+                    logging.info(f"Successfully created project {pr}. Manager - {request.user}")
+                    return redirect('project', pr.pk)
             else:
                 form.add_error(None, 'Длинное описание проекта не может быть короче краткого!')
         return render(request, self.template_name, context={'form':form})

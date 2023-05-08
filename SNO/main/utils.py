@@ -71,6 +71,7 @@ def user_can_mark_reports(user:CustomUser, project:Project):
     if not user.is_authenticated:
         return False
     if not user.is_superuser:
+        print(user.study_group.type)
         if not user.study_group.type == StudyGroup.StudyGroupType.TEACHER:
             return False
         else:

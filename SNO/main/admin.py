@@ -53,13 +53,22 @@ class ProjectAdmin(admin.ModelAdmin):
 
     get_html_poster.short_description="Постер (превью)"
 
-    actions = ['confirm_projects']
+    actions = ['confirm_projects','close_projects']
     @admin.action(description='Одобрить проекты')
     def confirm_projects(self, request, queryset):
         updated = queryset.update(project_status=Project.ProjectStatus.ENROLLMENTOPENED)
         self.message_user(request, ngettext(
             '%d проект был успешно одобрен.',
             '%d проектов было успешно одобрено.',
+            updated,
+        ) % updated, messages.SUCCESS)
+
+    @admin.action(description='Закрыть проекты')
+    def close_projects(self, request, queryset):
+        updated = queryset.update(project_status=Project.ProjectStatus.ENROLLMENTCLOSED)
+        self.message_user(request, ngettext(
+            '%d проект был успешно закрыт.',
+            '%d проектов было успешно закрыто.',
             updated,
         ) % updated, messages.SUCCESS)
 
