@@ -23,6 +23,66 @@
             {% endif %}
 
 
+{% if unmarked_reports or marked_reports %}
+<div class="row">
+  {% if unmarked_reports %}
+    <div class="col-sm-12 col-md-6">
+      <h1>Не оценнёные мной отчёты:</h1>
+      {% for r in unmarked_reports %}
+      <div class="list-group-item d-flex justify-content-between align-items-start">
+        <div class="ms-2 me-auto w-100 mb-3">
+          <div class="list-group">
+            <a href="{% url 'project' r.project.pk %}" class="list-group-item list-group-item-action active">
+              <div class="fw-bold d-flex justify-content-between">
+                {{r.project.name_of_project}}
+                <span class="badge bg-light text-dark"><b>{{ r.reports|length }}</b></span>
+              </div>
+            </a>
+            {% for report in r.reports %}
+             <a href="{% url 'create_mark' report.pk %}" class="list-group-item list-group-item-action"> {{ report.heading }} - {{ report.author }}</a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  {% endif %}
+
+  {% if marked_reports %}
+    <div class="col">
+      <h1>Oценённые мной отчёты:</h1>
+      {% for r in marked_reports %}
+      <div class="list-group-item d-flex justify-content-between align-items-start">
+        <div class="ms-2 me-auto w-100 mb-3">
+          <div class="list-group">
+            <a href="{% url 'project' r.project.pk %}" class="list-group-item list-group-item-action active">
+              <div class="fw-bold d-flex justify-content-between">
+                {{r.project.name_of_project}}
+                <span class="badge bg-light text-dark" style="max-high:20px"><b>{{ r.marks|length }}</b></span>
+              </div>
+            </a>
+            {% for mark in r.marks %}
+             <a href="{% url 'create_mark' mark.related_report.pk %}" class="list-group-item list-group-item-action">
+               <div class="d-flex justify-content-between">
+                 {{ mark.related_report.heading }} - {{ mark.related_report.author }}
+                 <span class="badge bg-light
+{% if mark.value < 60 %} text-danger {% elif mark.value < 70 %} text-secondary {% elif mark.value < 90 %} text-primary {% else %} text-success {% endif %}"
+                 >
+                   <b>{{ mark.value }}</b></span>
+               </div>
+             </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+{% endif %}
+
 
 {% if my_applies or managed_applies or managed_projects or projects %}
 {% if my_applies %}
@@ -81,10 +141,11 @@
 {% endif %}
 
 
+
 {% else %}
 <h3>Добро пожаловать, {{ user.get_full_name }}!</h3>
-<p>Кажется, вы только что зарегистрировались. Давайте поищем проекты <i><a href="">специально для вас</a>!</i> Или вы всегда можете <i><a
-        href="">создать свой собственный проект</a>!</i></p><!-- TODO: insert links -->
+<p>Кажется, вы только что зарегистрировались. Давайте поищем проекты <i><a href="{% url 'MAIN' %}">специально для вас</a>!</i> Или вы всегда можете <i><a
+        href="{% url 'add_project' %}">создать свой собственный проект</a>!</i></p>
 <hr>
 <p> Впрочем, можете не спешить - от пересдачи по ОПД ещё никто не умирал, хотя отчислиться вполне можно.</p>
 {% endif %}

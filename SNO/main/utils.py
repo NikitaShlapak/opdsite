@@ -82,3 +82,35 @@ def user_can_mark_reports(user:CustomUser, project:Project):
             if not group_match:
                 return False
     return True
+
+def get_all_unmarked_reports(user:CustomUser, project:Project):
+    if user.study_group.type != StudyGroup.StudyGroupType.TEACHER:
+        return None
+    else:
+        reports = []
+        for report in project.projectreport_set.all():
+            try:
+                mark = report.projectreportmark_set.get(author=user)
+            except:
+                if report.author != user:
+                    reports.append(report)
+            else:
+                pass
+                # print(mark)
+        return reports
+
+def get_all_report_marks(user:CustomUser, project:Project):
+    if user.study_group.type != StudyGroup.StudyGroupType.TEACHER:
+        return None
+    else:
+        marks = []
+        for report in project.projectreport_set.all():
+            try:
+                mark = report.projectreportmark_set.get(author=user)
+            except:
+                # print(report)
+                pass
+            else:
+                if report.author != user:
+                    marks.append(mark)
+        return marks

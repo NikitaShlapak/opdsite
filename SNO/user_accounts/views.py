@@ -10,7 +10,7 @@ from django.contrib.auth import logout as django_logout
 
 
 from .forms import CustomUserCreationForm, CustomUserAuthenticationForm
-from main.utils import DataMixin
+from main.utils import DataMixin, get_all_unmarked_reports, get_all_report_marks
 from main.models import Project, Applications
 from main.forms import SearchForm
 
@@ -72,7 +72,20 @@ class ProfilePage(DataMixin, LoginRequiredMixin, ListView):
         # print(my_project_ids)
         context['managed_applies'] = Applications.objects.filter(project__pk__in=my_project_ids).order_by('-pk')
         # print(len(context['managed_applies']))
-
+        unmarked_reports = []
+        for project in Project.objects.all():
+            if get_all_unmarked_reports(self.request.user,project):
+                unmarked_reports.append({'project':project,
+                                         'reports':get_all_unmarked_reports(self.request.user,project)})
+        report_marks = []
+        for project in Project.objects.all():
+            if get_all_report_marks(self.request.user, project):
+                report_marks.append({'project': project,
+                                      'marks': get_all_report_marks(self.request.user, project)})
+        if unmarked_reports:
+            context['unmarked_reports']=unmarked_reports
+        if report_marks:
+            context['marked_reports']=report_marks
         c_def = self.get_user_context(selected='profile')
         return context|c_def
 
