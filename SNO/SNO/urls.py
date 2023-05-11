@@ -6,6 +6,7 @@ from SNO import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('yummyobn/', include('yumymap.urls', namespace='map')),
     path('', include('main.urls'))
 ]
 
