@@ -125,15 +125,26 @@ class ProjectView(DataMixin, DetailView):
             reports_marked.append({'report':report, 'mark':mark})
 
             # print(report,report.get_average_mark(), )
-        print(reports_marked)
+        # print(reports_marked)
+        # text = project.long_project_description
+        conv = WikiPlainHTMLTextTransformer()
+        # print(conv)
+        # conv.fit(text)
         c_def = self.get_user_context(selected=project.project_type,
-                                      desc=project.long_project_description.split('\n'),
+                                      desc = conv.fit(project.long_project_description),
                                       reject_form=ProjectRejectForm(),
                                       applyies=Applications.objects.filter(project__pk=project.pk).order_by('pk'),
                                       reports=reports_marked,
                                       reports_markable=user_can_mark_reports(user,project))
         context['user'] = user
         return context | c_def
+
+    def get(self, request, *args,**kwargs):
+        text = Project.objects.get(pk=kwargs[self.pk_url_kwarg]).long_project_description
+        conv = WikiPlainHTMLTextTransformer()
+        # print(conv)
+        conv.fit(text)
+        return super().get(request, *args, **kwargs)
 
 
 
@@ -164,6 +175,11 @@ class ProjectCreationView(DataMixin, LoginRequiredMixin, CreateView):
                     form.add_error(None, 'Ошибка регистрации проекта')
                 else:
                     logging.info(f"Successfully created project {pr}. Manager - {request.user}")
+                    # text = pr.long_project_description
+                    #
+                    # conv = WikiPlainHTMLTextTransformer()
+                    # # print(conv)
+                    # conv.fit(text)
                     return redirect('project', pr.pk)
             else:
                 form.add_error(None, 'Длинное описание проекта не может быть короче краткого!')

@@ -114,3 +114,64 @@ def get_all_report_marks(user:CustomUser, project:Project):
                 if report.author != user:
                     marks.append(mark)
         return marks
+
+
+class WikiPlainHTMLTextTransformer:
+    def fit(self, text:str):
+        return self.fit_plain(text)
+    def fit_plain(self, text:str):
+        text = text.replace(self.u[0], '<u>').replace(self.u[1], '</u>').replace(self.i[0], '<i>').replace(self.i[1], '</i>').replace(self.b[0], '<b>').replace(self.b[1], '</b>').replace(self.hr, '<hr>')
+        text = text.replace(self.olist[0], '<ol>').replace(self.olist[-1], '</ol>').replace(self.ulist[0], '<ul>').replace(self.ulist[-1], '</ul>')
+        text = text.replace(self.olist[1], '<li>').replace(self.olist[2], '</li>').replace(self.ulist[1], '<li>').replace(self.ulist[2], '</li>')
+        text = text.replace(self.table[0], '<table class="table table-primary table-bordered text-center align-middle">').replace(self.table[-1], '</table>')
+        text = text.replace(self.table[1], '<tr>').replace(self.table[2], '<td>').replace(self.table[3], '</tr>').replace(self.table[4], '</td>')
+        text_split = text.split('\r\n')
+        new_text = ''
+        for i in range(len(text_split)):
+            line = text_split[i]
+            print(f"1|{line}|")
+            if not len(line):
+                line = '<br>'
+            if line.startswith(self.h):
+                if line.startswith(self.h * 2):
+                    if line.startswith(self.h * 3):
+                        line = f'<h6>{line[3:]}</h6>'
+                    else:
+                        line = f'<h5>{line[2:]}</h5>'
+                else:
+                    line = f'<h4>{line[1:]}</h4>'
+
+            if         line.startswith('<br>') \
+                    or line.startswith('<h') \
+                    or line.startswith('<ol>') or line.startswith('</ol>') \
+                    or line.startswith('<ul>') or line.startswith('</ul>') \
+                    or line.startswith('<li>') or line.startswith('</li>')  \
+                    or line.startswith('<table') or line.startswith('</table>') \
+                    or line.startswith('<tr>') or line.startswith('</tr>') \
+                    or line.startswith('<td>') or line.startswith('</td>'):
+                pass
+            else:
+                if new_text:
+                    new_text = new_text+'<br>'
+            new_text = new_text + line
+        return new_text
+
+
+    def __init__(self,
+                     h = '#',
+                     u = '{{ }}'.split(' '),
+                     i = '(( ))'.split(' '),
+                     b = '[[ ]]'.split(' '),
+                     hr = '---',
+                     olist = '<<olist>> <<newline>> <<endline>> <<endolist>>'.split(' '),
+                     ulist = '<<ulist>> <<newline>> <<endline>> <<endulist>>'.split(' '),
+                     table = '<<table>> <<newrow>> <<newcol>> <<endrow>> <<endcol>> <<endtable>>'.split(' ')
+                 ):
+        self.h = h
+        self.u = u
+        self.i = i
+        self.b = b
+        self.hr = hr
+        self.olist = olist
+        self.ulist = ulist
+        self.table = table

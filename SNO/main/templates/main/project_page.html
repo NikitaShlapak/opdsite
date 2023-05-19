@@ -31,9 +31,10 @@
                   <h3 class="card-title">Куратор: {{ p.manager.get_full_name }}</h3>
                   <h5 class="card-title">Учебные группы исполнителей: {{ p.get_all_target_group_types }}</h5>
                   <h5 class="card-title">{{ p.get_project_status_display }}</h5>
-                  {% for line in desc %}
-                    <p class="card-text">{{ line }}</p>
-                  {% endfor %}
+                  <hr>
+                  <h5>Описание проекта:</h5>
+                  <div class="card-text">{{ desc|safe }}</div>
+
 
                   {% if p.project_status == 'opened' %}
                     {% if not request.user == p.manager and not request.user in p.team.all %}
