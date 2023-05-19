@@ -3,14 +3,14 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
-from django.urls import reverse_lazy
+
 from django.views import View
 from django.views.generic import UpdateView, CreateView, DetailView, TemplateView, FormView
 
 from .env import MAX_UPLOAD_FILE_SIZE, ALLOWED_CONTENT_TYPES
 from .forms import *
-from .utils import *
-
+from .standalone_utils import form_title, WikiPlainHTMLTextTransformer
+from .utils import find_by_group, find_by_name, DataMixin, user_can_mark_reports, generate_edition_key
 
 logging.basicConfig(level=logging.INFO, filename="main_views.log",filemode="a",
                     format="%(asctime)s %(levelname)s %(message)s")
@@ -121,15 +121,9 @@ class ProjectView(DataMixin, DetailView):
                 mark = marks[0]
             except:
                 pass
-
             reports_marked.append({'report':report, 'mark':mark})
 
-            # print(report,report.get_average_mark(), )
-        # print(reports_marked)
-        # text = project.long_project_description
         conv = WikiPlainHTMLTextTransformer()
-        # print(conv)
-        # conv.fit(text)
         c_def = self.get_user_context(selected=project.project_type,
                                       desc = conv.fit(project.long_project_description),
                                       reject_form=ProjectRejectForm(),
@@ -175,11 +169,6 @@ class ProjectCreationView(DataMixin, LoginRequiredMixin, CreateView):
                     form.add_error(None, 'Ошибка регистрации проекта')
                 else:
                     logging.info(f"Successfully created project {pr}. Manager - {request.user}")
-                    # text = pr.long_project_description
-                    #
-                    # conv = WikiPlainHTMLTextTransformer()
-                    # # print(conv)
-                    # conv.fit(text)
                     return redirect('project', pr.pk)
             else:
                 form.add_error(None, 'Длинное описание проекта не может быть короче краткого!')
@@ -438,14 +427,13 @@ class ReportCreateView(DataMixin, LoginRequiredMixin,DetailView, FormView):
     def post(self, request, *args, **kwargs):
         self.project = get_object_or_404(Project, pk=kwargs['project_id'])
         self.object = get_object_or_404(Project, pk=kwargs['project_id'])
-
-        # print('post - ',self.project)
         return super().post(request,*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        conv = WikiPlainHTMLTextTransformer()
         c_def = self.get_user_context(selected=context['p'].project_type,
-                                      desc=context['p'].long_project_description.split('\n'),
+                                      desc=conv.fit(context['p'].long_project_description),
                                       reject_form=ProjectRejectForm(),
                                       applyies=Applications.objects.filter(project__pk=context['p'].pk).order_by('pk'))
         context['user'] = self.request.user

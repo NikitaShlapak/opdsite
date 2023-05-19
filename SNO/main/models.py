@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models import Q
 from django.urls import reverse
 
+from main.standalone_utils import WikiPlainHTMLTextTransformer
 from user_accounts.models import CustomUser, StudyGroup
 
 
@@ -52,7 +53,9 @@ class Project(models.Model):
 
     def get_absolute_url(self):
         return reverse('project', kwargs={'project_id': self.pk})
-
+    def get_html_desc(self):
+        conv = WikiPlainHTMLTextTransformer()
+        return conv.fit(self.long_project_description)
     def is_approved(self):
         return self.manager.is_approved or self.manager.is_staff
 
@@ -101,7 +104,9 @@ class ProjectReport(models.Model):
 
     def get_absolute_url(self):
         return reverse('project', kwargs={'project_id': self.parent_project.pk})
-
+    def get_html_text(self):
+        conv = WikiPlainHTMLTextTransformer()
+        return conv.fit(self.text)
     def is_markable(self):
         if not (self.author.study_group.type == StudyGroup.StudyGroupType.TEACHER or self.author.study_group.type == StudyGroup.StudyGroupType.OUTSIDER):
             return True
@@ -145,3 +150,5 @@ class ProjectReportMark(models.Model):
     class Meta:
         verbose_name = 'Оценка'
         verbose_name_plural = 'Оценки'
+
+

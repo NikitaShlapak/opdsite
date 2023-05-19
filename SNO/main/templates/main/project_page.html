@@ -33,7 +33,7 @@
                   <h5 class="card-title">{{ p.get_project_status_display }}</h5>
                   <hr>
                   <h5>Описание проекта:</h5>
-                  <div class="card-text">{{ desc|safe }}</div>
+                  <div class="card-text">{{ p.get_html_desc|safe }}</div>
 
 
                   {% if p.project_status == 'opened' %}
@@ -93,7 +93,7 @@
                           <div class="card-body">
                              <h4>{{ r.report.heading }}</h4>
                               <hr>
-                              <p>{{ r.report.text }}</p>
+                              <p>{{ r.report.get_html_text|safe }}</p>
 
                           {% if r.file %}
                               <hr>
