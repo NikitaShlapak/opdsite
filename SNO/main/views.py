@@ -125,7 +125,7 @@ class ProjectView(DataMixin, DetailView):
 
         conv = WikiPlainHTMLTextTransformer()
         c_def = self.get_user_context(selected=project.project_type,
-                                      desc = conv.fit(project.long_project_description),
+
                                       reject_form=ProjectRejectForm(),
                                       applyies=Applications.objects.filter(project__pk=project.pk).order_by('pk'),
                                       reports=reports_marked,
@@ -431,9 +431,19 @@ class ReportCreateView(DataMixin, LoginRequiredMixin,DetailView, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        conv = WikiPlainHTMLTextTransformer()
-        c_def = self.get_user_context(selected=context['p'].project_type,
-                                      desc=conv.fit(context['p'].long_project_description),
+        project = context['p']
+        reports_marked = []
+        for report in project.projectreport_set.all():
+            mark = []
+            try:
+                marks = report.projectreportmark_set.filter(author=self.request.user)
+                mark = marks[0]
+            except:
+                pass
+            reports_marked.append({'report': report, 'mark': mark})
+        c_def = self.get_user_context(selected=project.project_type,
+                                      reports = reports_marked,
+                                      reports_markable=user_can_mark_reports(self.request.user, project),
                                       reject_form=ProjectRejectForm(),
                                       applyies=Applications.objects.filter(project__pk=context['p'].pk).order_by('pk'))
         context['user'] = self.request.user

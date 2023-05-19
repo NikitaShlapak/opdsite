@@ -12,7 +12,8 @@ class WikiPlainHTMLTextTransformer:
         for i in range(len(text_split)):
             line = text_split[i]
             print(f"1|{line}|")
-            if not len(line.strip()):
+            line = line.strip()
+            if not len(line):
                 line = '<br>'
             if line.startswith(self.h):
                 if line.startswith(self.h * 2):
@@ -22,9 +23,20 @@ class WikiPlainHTMLTextTransformer:
                         line = f'<h5>{line[2:]}</h5>'
                 else:
                     line = f'<h4>{line[1:]}</h4>'
+            if not (line.endswith('<hr>') or line.endswith('<br>') or
+                    line.endswith('<h4>') or line.endswith('</h4>') or
+                    line.endswith('<h5>') or line.endswith('</h5>') or
+                    line.endswith('<h6>') or line.endswith('</h6>') or
+                    line.endswith('<tr>') or line.endswith('</tr>') or
+                    line.endswith('<td>') or line.endswith('</td>') or
+                    line.endswith('<li>') or line.endswith('</li>') or
+                    line.endswith('<ol>') or line.endswith('</ol>') or
+                    line.endswith('<ul>') or line.endswith('</ul>') or
+                    line.endswith('<table class="table table-primary table-bordered text-center align-middle">') or line.endswith('</table>')
+            ):
+                line = line + '<br>'
             new_text = new_text + line
             print(f"2|{line}|")
-        print(new_text)
         return new_text
 
 

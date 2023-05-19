@@ -30,9 +30,14 @@
 
       {% for field in form %}
 
-        <div class="mb-1 row">
+        <div class="mt-1 row">
           <div class="col-md-12">
-            <label for="{{ field.id_for_label }}" class="form-label fs-4">{{ field.label }}</label>
+            <label for="{{ field.id_for_label }}" class="form-label fs-4">{{ field.label }}
+              {% if field == form.text %}
+              <br><button type="button" class="btn btn-outline-primary mt-1 py-0 px-1" data-bs-toggle="modal" data-bs-target="#WikiHelpModal">
+                                  Помощь по вики-разметке
+                              </button>{% endif %}
+            </label>
             {{ field }}
 
             {% if field.errors %}
@@ -40,7 +45,8 @@
             {% endif %}
           </div>
         </div>
-
+        {% if field == form.text %}     <p><i>В этом поле допускается использование <b class="text-primary">вики-разметки</b>. Используйте её, чтобы сделать ваше описание более визуально привлекательным и/или логически разметить текст</i></p>
+ {% endif %}
         <hr>
 
       {% endfor %}
@@ -61,6 +67,6 @@
 </div>
 
 
-
+{% include '../wiki-mark_help.html' %}
 
 {% endblock %}
