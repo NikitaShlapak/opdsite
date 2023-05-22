@@ -1,5 +1,6 @@
 import random
 
+from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from django.db import models
 from django.urls import reverse
@@ -91,6 +92,13 @@ class Project(models.Model):
     def is_approved(self):
         return self.manager.is_approved
 
+    def get_mark(self):
+        resp = 0
+        for mark in self.projectmark_set.all():
+            resp += mark.value
+        return int(round(resp/len(self.projectmark_set.all()),0))
+
+
     class Meta:
         verbose_name = 'Проект'
         verbose_name_plural = 'Проекты'
@@ -114,3 +122,22 @@ class ProjectReport(models.Model):
     class Meta:
         verbose_name = 'Отчёт'
         verbose_name_plural = 'Отчёты'
+
+
+
+class ProjectMark(models.Model):
+    related_project = models.ForeignKey(Project, verbose_name='Проект', on_delete=models.CASCADE)
+    author=models.ForeignKey(User, verbose_name='Преподаватель',
+                                         on_delete=models.CASCADE,
+                                         null=True,
+                                         limit_choices_to={'is_staff':True})
+    value = models.SmallIntegerField(verbose_name='Балл', default=0)
+
+    def __str__(self):
+        return f"Оценка пользователя {self.author.username} к проекту {self.related_project}."
+
+    def get_absolute_url(self):
+        return self.related_project.get_absolute_url()
+    class Meta:
+        verbose_name = 'Оценка'
+        verbose_name_plural = 'Оценки'

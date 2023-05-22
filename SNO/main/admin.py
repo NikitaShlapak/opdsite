@@ -53,6 +53,14 @@ class ProjectReportAdmin(admin.ModelAdmin):
     search_fields = ('parent_project', 'author', 'text')
     sortable_by = ('publishing_time','parent_project','author')
 
+class ProjectMarkAdmin(admin.ModelAdmin):
+    list_display = ('related_project', 'author', 'value')
+    list_display_links = ('related_project','author')
+    search_fields = ('related_project__name_of_project', )
+    sortable_by = list_display
+    list_filter = ('author',)
+
+admin.site.register(ProjectMark, ProjectMarkAdmin)
 admin.site.register(TeamMember, TeamMemberAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectReport, ProjectReportAdmin)

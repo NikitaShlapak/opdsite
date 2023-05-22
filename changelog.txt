@@ -1,7 +1,0 @@
-13.02.2023
-SNO/main/admin.py -> изменён класс ProjectAdmin
-templates/main -> Изменены файлы index.html и project_page.html - добавлено css-свойство тегам <img>
-
-14.02.2023
-SNO/SNO/settings.py -> TIME_ZONE = 'Europe/Moscow'
-SNO/main/views.py -> изменена функция AddProject, удалены все print(), изменены письма

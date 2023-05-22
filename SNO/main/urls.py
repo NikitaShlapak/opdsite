@@ -12,6 +12,7 @@ urlpatterns = [
     path('register', views.AddTeamMember, name='add_user'),
     path('project/<int:project_id>/register', views.ExpandTeam, name='expand'),
     path('project/<int:project_id>/verify_edit', views.verify_edition, name='verify_edition'),
+    path('project/<int:project_id>/mark', views.MarkCreationView.as_view(), name='mark_project'),
     path('project/<int:project_id>/reject', views.reject_project, name='verify_delete'),
     path('project/<int:project_id>-<int:edition_key>/confirm', views.confirm_project, name='confirm_project'),
     path('project/<int:pk>/edit/<int:edition_key>', views.ProjectUpdateView.as_view(), name='edit'),

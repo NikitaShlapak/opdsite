@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Оценка проекта {{ p.name_of_project }}{% endblock %}
+
+{% block body %}
+<h1>Оценка проекта {{ p.name_of_project }}</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit" class="btn btn-primary">Подтвердить</button>
+
+</form>
+
+{% endblock %}

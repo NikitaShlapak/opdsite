@@ -1,7 +1,9 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import UpdateView
+from django.urls import reverse_lazy
+from django.views.generic import UpdateView, CreateView
 
 from .models import *
 from .forms import *
@@ -393,3 +395,31 @@ class ProjectUpdateView(UpdateView):
         return context
 
 
+class MarkCreationView( LoginRequiredMixin ,CreateView):
+    model = ProjectMark
+    # object = ProjectMark
+    fields = ['value']
+    template_name = 'main/mark.html'
+
+
+    def handle_no_permission(self):
+        raise Http404
+    def form_valid(self, form):
+        project = get_object_or_404(Project, pk=self.kwargs['project_id'])
+        user = self.request.user
+        data = form.cleaned_data
+        # print(data, data['value'])
+        if data['value'] <0 or data['value'] > 100 :
+            form.add_error('value', 'Оценка должна быть в пределах от 0 до 100')
+            return self.form_invalid(form)
+        try:
+            mark, created= ProjectMark.objects.get_or_create(related_project=project, author=user)
+            # print(mark)
+            mark.value = data['value']
+            mark.save()
+        except:
+            form.add_error(None, 'Ошибка добавления оценки. Попробуйте ещё раз')
+            return self.form_invalid(form)
+        else:
+            # print(mark.__dict__)
+            return redirect(project.get_absolute_url())
