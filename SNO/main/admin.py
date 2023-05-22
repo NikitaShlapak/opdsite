@@ -13,7 +13,7 @@ class TeamMemberAdmin(admin.ModelAdmin):
     sortable_by = ('secondname', 'group', 'state', 'current_project')
 
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('name_of_project', 'manager', 'project_type', 'project_status')
+    list_display = ('name_of_project',  'get_html_mark', 'manager','project_status')
     list_display_links = ('name_of_project',)
     list_editable = ('project_status',)
     search_fields = ('name_of_project', 'manager__firstname', 'manager__secondname')
@@ -30,18 +30,33 @@ class ProjectAdmin(admin.ModelAdmin):
          {"fields": ("short_project_description", "long_project_description")}
          )
     )
-    readonly_fields = ('edition_key', 'get_html_poster')
+    readonly_fields = ('edition_key', 'get_html_poster','get_html_mark')
 
     def get_html_poster(self, object):
         return mark_safe(f"<img src={object.poster.url} height=400>")
 
     get_html_poster.short_description = "Постер (превью)"
 
-    actions = ['confirm_projects']
+    def get_html_mark(self, object):
+        marks_num = len(object.projectmark_set.all())
+        return mark_safe(f"{object.get_mark()} из 40 <br> Всего оценило: {marks_num}")
+
+    get_html_mark.short_description = "Оценка"
+
+    actions = ['confirm_projects', 'close_projects']
 
     @admin.action(description='Одобрить проекты')
     def confirm_projects(self, request, queryset):
         updated = queryset.update(project_status=Project.ProjectStatus.ENROLLMENTOPENED)
+        self.message_user(request, ngettext(
+            '%d проект был успешно одобрен.',
+            '%d проектов было успешно одобрено.',
+            updated,
+        ) % updated, messages.SUCCESS)
+
+    @admin.action(description='Закрыть проекты')
+    def close_projects(self, request, queryset):
+        updated = queryset.update(project_status=Project.ProjectStatus.ENROLLMENTCLOSED)
         self.message_user(request, ngettext(
             '%d проект был успешно одобрен.',
             '%d проектов было успешно одобрено.',
