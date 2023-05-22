@@ -96,7 +96,9 @@ class Project(models.Model):
         resp = 0
         for mark in self.projectmark_set.all():
             resp += mark.value
-        return int(round(resp/len(self.projectmark_set.all()),0))
+        if resp:
+            int(round(resp / len(self.projectmark_set.all()), 0))
+        return resp
 
 
     class Meta:

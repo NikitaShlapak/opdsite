@@ -52,9 +52,11 @@
     <p class="card-text">{{ p.short_project_description }}</p>
     <a href="{% url 'project' p.pk %}" class="btn btn-primary">Страница проекта</a>
   </div>
+    {% if p.projectmark_set.all|length %}
   <div class="card-footer px-5">
           <h4>Оценка: {{ p.get_mark }} из 100</h4>
    </div>
+    {% endif %}
 </div>
 </div>
 
