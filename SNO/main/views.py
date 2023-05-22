@@ -409,8 +409,8 @@ class MarkCreationView( LoginRequiredMixin ,CreateView):
         user = self.request.user
         data = form.cleaned_data
         # print(data, data['value'])
-        if data['value'] <0 or data['value'] > 100 :
-            form.add_error('value', 'Оценка должна быть в пределах от 0 до 100')
+        if data['value'] <0 or data['value'] > 60 :
+            form.add_error('value', 'Оценка должна быть в пределах от 0 до 60')
             return self.form_invalid(form)
         try:
             mark, created= ProjectMark.objects.get_or_create(related_project=project, author=user)

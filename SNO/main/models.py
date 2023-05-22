@@ -101,6 +101,7 @@ class Project(models.Model):
         return resp
 
 
+
     class Meta:
         verbose_name = 'Проект'
         verbose_name_plural = 'Проекты'
