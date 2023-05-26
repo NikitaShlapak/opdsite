@@ -14,7 +14,8 @@
 <div class="row container-fluid">
   <div class="d-flex flex-column flex-shrink-0  p-3 text-bg-light border-end border-dark col-md-3" >
     <a href="{% url 'MAIN' %}" class="d-flex align-items-center mb-5 mb-md-0 me-md-auto text-white text-decoration-none">
-      <img width="100%" height="100%" src="{% static 'main\images\logos\logo.png' %}" alt="logo" >
+      <img width="80%"  src="{% static 'main\images\logos\logo.png' %}" alt="logo" >
+      <img width="25%"  src="{% static 'main\images\beta.png' %}" alt="beta" >
     </a>
 
     <ul class="nav nav-pills flex-column mb-auto">
@@ -160,6 +161,18 @@
         {% endif %}
       </li>
 
+      <li class="nav-item">
+        {% if selected == 'help' %}
+        <a href="#" class="nav-link active" aria-current="page">
+          Проблемы с регистрацией?
+        </a>
+        {% else %}
+        <a href="{% url 'help' %}" class="nav-link text-black">
+          Проблемы с регистрацией?
+        </a>
+        {% endif %}
+      </li>
+
 
       <hr>
 
@@ -189,9 +202,15 @@
   <footer class="d-flex flex-wrap justify-content-between align-items-center py-2 my-4 ">
     <div class="col-md-4 d-flex align-items-center">
       <a href="/" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
+    <div class="row">
+        <div class="col-auto pe-0 pt-1">
+          <img class="bi" height="50px" src="{% static 'main\images\logos\logo.png' %}" alt="logo" >
+        </div>
+        <div class="col ps-0 text-dark">
+            <i><h1>Beta</h1></i>
+        </div>
 
-          <img class="bi" width="150" height="50" src="{% static 'main\images\logos\logo.png' %}" alt="logo">
-
+    </div>
       </a>
       <span class="mb-3 mb-md-0 text-dark">© 2023 СНО ИАТЭ НИЯУ МИФИ</span>
     </div>

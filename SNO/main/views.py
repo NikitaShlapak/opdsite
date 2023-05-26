@@ -60,6 +60,15 @@ def Info(request):
     data['title'] = form_title(data['selected'])
     return render(request, 'main/info.html', context=data)
 
+def Help(request):
+    group_form = SearchForm()
+    data = {
+        'group_form': group_form,
+        'selected': 'help'
+    }
+    data['title'] = form_title(data['selected'])
+    return render(request, 'main/help.html', context=data)
+
 
 def MainFiltered(request, type):
     if type in Project.ProjectStatus:

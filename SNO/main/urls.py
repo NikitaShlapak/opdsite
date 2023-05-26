@@ -7,6 +7,7 @@ urlpatterns = [
     path('OPD/', views.Opd, name='OPD'),
     path('project/<int:project_id>/', views.ProjectPage, name='project'),
     path('info/', views.Info, name='info'),
+    path('help/', views.Help, name='help'),
     path('project/<int:project_id>/add_report', views.AddReport, name='add_report'),
     path('project/add', views.AddProject, name='add_project'),
     path('register', views.AddTeamMember, name='add_user'),
