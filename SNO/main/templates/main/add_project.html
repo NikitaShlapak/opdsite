@@ -10,7 +10,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
 <h1>Регистрация проекта | Add project</h1>
-
+<p>Проблемы с регистрацией? - <a href="{% url 'help' %}"><i>помощь</i></a>.</p>
 <form id="form" action="{% url 'add_project' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
     <div class="mb-3 text fs-5 text-danger">
