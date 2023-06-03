@@ -1,3 +1,32 @@
 {% extends 'base_bot.html' %}
 {% load static %}
 
+{% block body %}
+
+<div class="d-flex flex-wrap">
+    {% for ev in events %}
+    <div class="card border-dark m-2" style="width: 30rem">
+        <div class="card-header bg-black pb-0 px-0">
+            <h4 class="text-center">
+            {{ ev.title }}
+            </h4>
+            <hr class="my-1">
+            <p class="text-end my-1 mx-3"><i>{{ ev.act_time }}</i></p>
+        </div>
+        <div class="card-body bg-dark bg-gradient" style="height:20rem">
+            {{ ev.description }}
+        </div>
+        <div class="card-footer bg-black px-0 pb-0">
+            <p class="text-end mx-3 mb-1"><i>Приём заявок до {{ ev.deadline }}</i></p>
+            <a href="" class="btn btn-outline-light w-100">
+                Подать заявку
+            </a>
+        </div>
+    </div>
+     {% endfor %}
+
+</div>
+
+
+
+{% endblock %}

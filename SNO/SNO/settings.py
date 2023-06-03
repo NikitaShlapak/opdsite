@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'bot.apps.BotConfig',
     'user_accounts.apps.UserAccountsConfig',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [

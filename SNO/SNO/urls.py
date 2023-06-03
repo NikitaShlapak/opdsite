@@ -7,7 +7,7 @@ from SNO import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main.urls')),
-    path('bot/', include('bot.urls')),
+    path('events/', include('bot.urls', namespace='events')),
     path('accounts/', include('user_accounts.urls', namespace='user_accounts'))
 ]
 

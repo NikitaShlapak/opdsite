@@ -1,0 +1,25 @@
+<div class="pagination btn-group me-2 my-0" role="group" aria-label="pagination group">
+        {% if page_obj.has_previous %}
+            {% if page_obj.previous_page_number > 1 %}
+            <a href="?page=1" role="button" class="btn btn-outline-secondary text-white p-1">1</a>
+            {% endif %}
+            {% if page_obj.previous_page_number > 2 %}
+            <a href="" role="button" class="btn btn-outline-secondary text-white p-1" disabled>...</a>
+            {% endif %}
+            <a href="?page={{ page_obj.previous_page_number }}" role="button" class="btn btn-outline-secondary text-white p-1">{{ page_obj.previous_page_number}}</a>
+        {% endif %}
+            <a href="?page=1" role="button" class="btn btn-outline-secondary active text-white p-1">{{ page_obj.number }}</a>
+        {% if page_obj.has_next %}
+
+            {% if page_obj.next_page_number < page_obj.paginator.num_pages %}
+            <a href="?page={{ page_obj.next_page_number }}" role="button" class="btn btn-outline-secondary text-white p-1">{{ page_obj.next_page_number }}</a>
+            {% endif %}
+
+            {% if page_obj.next_page_number|add:1 < page_obj.paginator.num_pages %}
+            <a href="" role="button" class="btn btn-outline-secondary text-white p-1" disabled>...</a>
+            {% endif %}
+
+            <a href="?page={{ page_obj.paginator.num_pages }}" role="button" class="btn btn-outline-secondary text-white p-1">{{ page_obj.paginator.num_pages }}</a>
+        {% endif %}
+</div>
+
