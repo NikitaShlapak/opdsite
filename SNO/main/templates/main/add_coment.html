@@ -11,42 +11,62 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
 
-<div class="container-fluid">
-<form id="form" action="{% url 'add_report' p.pk %}" method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-
-  <div class="mb-3 text fs-5 text-danger">
-      {{ form.non_field_errors }}
-  </div>
-  <div class="mb-3 row">
-    <div class="col-md-8">
-      <label for="{{ form.heading.id_for_label }}" class="form-label fs-4">{{ form.heading.label }}</label>
-      {{ form.heading }}
+<div class="card my-3">
+  <form id="form" action="{% url 'add_report' p.pk %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="card-header">
+      <h3>Добавление отчёта</h3>
     </div>
-    <div class="col-md-4">
-          <label for="{{ form.author.id_for_label }}" class="form-label fs-4">{{ form.author.label }}</label>
-            {{ form.author }}
+
+    <div class="card-body">
+
+      {% if form.non_field_errors %}
+      <div class="mb-3 text fs-5 text-danger">
+          {{ form.non_field_errors }}
       </div>
-    </div>
-  </div>
+      <hr>
+      {% endif %}
 
-  <div class="mb-3">
-    <label for="{{ form.text.id_for_label }}" class="form-label fs-4">{{ form.text.label }}</label>
-    {{ form.text }}
-  </div>
-  <div class="mb-3 row align-items-end">
-    <div class="col-md-auto">
-      <label for="{{ form.file.id_for_label }}" class="form-label fs-4">{{ form.file.label }}</label>
-      {{ form.file }}
+
+      {% for field in form %}
+
+        <div class="mt-1 row">
+          <div class="col-md-12">
+            <label for="{{ field.id_for_label }}" class="form-label fs-4">{{ field.label }}
+              {% if field == form.text %}
+              <br><button type="button" class="btn btn-outline-primary mt-1 py-0 px-1" data-bs-toggle="modal" data-bs-target="#WikiHelpModal">
+                                  Помощь по вики-разметке
+                              </button>{% endif %}
+            </label>
+            {{ field }}
+
+            {% if field.errors %}
+            <br>{{ field.errors }}
+            {% endif %}
+          </div>
+        </div>
+        {% if field == form.text %}     <p><i>В этом поле допускается использование <b class="text-primary">вики-разметки</b>. Используйте её, чтобы сделать ваше описание более визуально привлекательным и/или логически разметить текст</i></p>
+ {% endif %}
+        <hr>
+
+      {% endfor %}
+
+      <p class="card-text">Не забывайте о ограничениях на прикрепляемые к отчёту файлы:
+        <ul>
+          <li>формат только <b><i>.pdf, .doc(x)</i></b> или <b><i>.ppt(x)</i></b>;</li>
+          <li> максимальный размер - <b><i>25 Мб</i> </b> </li>
+        </ul>
+      </p>
+
     </div>
-    <div class="col-md-4 ">
-      <button type="submit" class="btn btn-primary">Опубликовать</button>
-    </div>
-  </div>
-</form>
+
+      <div class="card-footer py-3">
+          <button type="submit" class="btn btn-primary">Опубликовать</button>
+      </div>
+  </form>
 </div>
 
 
-
+{% include '../wiki-mark_help.html' %}
 
 {% endblock %}

@@ -7,7 +7,8 @@ from SNO import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main.urls')),
-    path('bot/', include('bot.urls'))
+    path('bot/', include('bot.urls')),
+    path('accounts/', include('user_accounts.urls', namespace='user_accounts'))
 ]
 
 handler404 = "main.views.page_not_found_view"

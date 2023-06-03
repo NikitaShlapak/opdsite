@@ -5,7 +5,6 @@ from .env import *
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -15,6 +14,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main.apps.MainConfig',
     'bot.apps.BotConfig',
+    'user_accounts.apps.UserAccountsConfig',
 ]
 
 MIDDLEWARE = [
@@ -46,7 +46,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'SNO.wsgi.application'
-
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -81,4 +80,4 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+AUTH_USER_MODEL = 'user_accounts.CustomUser'

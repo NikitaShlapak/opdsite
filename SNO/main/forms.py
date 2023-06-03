@@ -1,13 +1,13 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm
+from django.forms import CheckboxSelectMultiple
+
 from .models import *
 
-class ProjectConfirmationForm(forms.Form):
-   edition_key = forms.IntegerField(label="Ключ безопасности",widget=forms.TextInput(attrs={'class': 'form-control'}))
+class UserCheckboxSelectMultiple(CheckboxSelectMultiple):
+    template_name = "widgets/multiple_input_modified.html"
+    pass
 
-class ProjectRejectForm(forms.Form):
-   edition_key = forms.IntegerField(label="Ключ безопасности",widget=forms.TextInput(attrs={'class': 'form-control'}))
-   reason = forms.CharField(label="Причина отклонения",max_length=125, widget=forms.TextInput(attrs={'class': 'form-control'}))
-   comment = forms.CharField(label="Комментарий",widget=forms.Textarea(attrs={'rows':10,'class': 'form-control'}))
 
 class TeamMemberForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -54,7 +54,10 @@ class ProjectForm(forms.ModelForm):
 
 
 
-class ProjectForm(forms.ModelForm):
+
+
+class ProjectCreationForm(forms.ModelForm):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['project_type'].empty_label = 'Укажите тип проекта'
@@ -62,11 +65,11 @@ class ProjectForm(forms.ModelForm):
 
     class Meta:
         model = Project
-        fields = ['name_of_project', 'project_type', 'manager', 'target_groups', 'manager_email',
+        fields = ['name_of_project', 'project_type',  'target_groups',
                   'implementation_period', 'short_project_description', 'long_project_description', 'poster']
         widgets = {
             'name_of_project': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Проект проект"}),
-            'target_groups': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Учебные группы, для которых предназначен проект"}),
+            'target_groups': UserCheckboxSelectMultiple(),
             'short_project_description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Краткое (до 150 символов) описание проекта"}),
 
             'long_project_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3,
@@ -76,12 +79,11 @@ class ProjectForm(forms.ModelForm):
 
             'project_type': forms.Select(attrs={'class': 'form-control'}),
             'implementation_period': forms.Select(attrs={'class': 'form-control'}),
-            'manager': forms.Select(attrs={'class': 'selectpicker js-states form-control', 'data-live-search': 'true'}),
 
-            'manager_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': "somemail@oiate.ru"}),
+
+
 
         }
-
 
 class ProjectEditForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -95,13 +97,11 @@ class ProjectEditForm(forms.ModelForm):
                   'implementation_period', 'short_project_description', 'long_project_description', ]
         widgets = {
             'name_of_project': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Проект проект"}),
-            'target_groups': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Учебные группы, для которых предназначен проект"}),
+            'target_groups': UserCheckboxSelectMultiple(),
             'short_project_description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Краткое (до 150 символов) описание проекта"}),
 
             'long_project_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3,
                                                               'placeholder': "Полное описание проекта. \nНе сдерживайте себя!\nПрямо совсем не сдерживайте"}),
-
-
 
             'project_type': forms.Select(attrs={'class': 'form-control'}),
             'implementation_period': forms.Select(attrs={'class': 'form-control'}),
@@ -109,12 +109,12 @@ class ProjectEditForm(forms.ModelForm):
 
         }
 
+class ProjectRejectForm(forms.Form):
+   reason = forms.CharField(label="Причина отклонения",max_length=125, widget=forms.TextInput(attrs={'class': 'form-control'}))
+   comment = forms.CharField(label="Комментарий", widget=forms.Textarea(attrs={'rows': 3,'class': 'form-control'}))
+   hide_name = forms.BooleanField(label='Скрыть моё имя в письме куратору',widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),required=False)
 
-
-
-
-
-    class Meta:
+   class Meta:
         model = Project
         fields = ['name_of_project', 'project_type', 'target_groups',
                   'implementation_period', 'short_project_description', 'long_project_description', ]
@@ -136,18 +136,14 @@ class ProjectEditForm(forms.ModelForm):
 
 
 class ProjectReportForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['author'].empty_label = 'Автор не указан'
 
     class Meta():
         model = ProjectReport
-        fields = ['heading', 'text', 'file', 'author']
+        fields = ['heading', 'text', 'file']
         widgets = {
             'heading': forms.TextInput(attrs={'class': 'form-control'}),
             'text': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
             'file': forms.FileInput(attrs={'class': 'form-control'}),
-            'author': forms.Select(attrs={'class': 'selectpicker js-states form-control', 'data-live-search': 'true'}),
         }
 
 
@@ -167,3 +163,14 @@ class SearchNameForm(forms.Form):
     name = forms.CharField(max_length=128, widget=forms.TextInput(attrs={'class': 'form-control',
                                                                          'placeholder': "Введите часть названия или фамилии куратора",
                                                                          'aria-describedby': "button-addon2"}))
+
+
+class ProjectReporkMarkingForm(forms.ModelForm):
+    class Meta:
+        model = ProjectReportMark
+        fields = ['value', 'comment']
+
+        widgets = {
+            'value': forms.NumberInput(attrs={'class': 'form-control'}),
+            'comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+        }

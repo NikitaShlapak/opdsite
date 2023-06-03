@@ -1,7 +1,7 @@
 SNO/SNO/env.py
-media
-SNO/main/migrations
-SNO/bot/migrations
+media/
+SNO/*/migrations/
+
 
 
 
@@ -94,5 +94,9 @@ celerybeat.pid
 # Environments
 .venv
 venv/
+<<<<<<< HEAD
 venv.bak/
 
+=======
+venv.bak/
+>>>>>>> master
