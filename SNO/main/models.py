@@ -12,7 +12,7 @@ from user_accounts.models import CustomUser, StudyGroup
 
 class Project(models.Model):
     name_of_project = models.CharField('Название проекта', max_length=50)
-    # date_create = models.DateTimeField('Дата публикации', auto_now_add=True)
+    date_create = models.DateTimeField('Дата публикации', auto_now_add=True)
     edition_key = models.PositiveSmallIntegerField(default=random.randint(1000,32000))
 
     class ProjectType(models.TextChoices):

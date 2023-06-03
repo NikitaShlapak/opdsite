@@ -3,13 +3,16 @@ import datetime
 from django.contrib.auth.models import User
 from django.db import models
 
+from user_accounts.models import CustomUser
+
+
 class Event(models.Model):
     title = models.CharField(max_length=100, verbose_name='Название', default='')
     publishing_time = models.DateTimeField('Дата оглашения', auto_now_add=True)
     act_time = models.DateTimeField('Дата прохождения')
     deadline = models.DateTimeField('Окончание приёма заявок')
     description = models.TextField('Описание')
-    manager = models.ForeignKey(User, verbose_name='Ответственный', on_delete=models.CASCADE)
+    manager = models.ForeignKey(CustomUser, verbose_name='Ответственный', on_delete=models.CASCADE)
     file = models.FileField(upload_to='uploads/bot_files/%Y/%m/%d/', blank=True, verbose_name='Прилагаемый файл')
 
     def __str__(self):

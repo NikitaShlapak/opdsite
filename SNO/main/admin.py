@@ -6,12 +6,6 @@ from django.utils.translation import ngettext
 
 from .models import *
 
-class TeamMemberAdmin(admin.ModelAdmin):
-    list_display = ('firstname', 'secondname', 'group', 'current_project', 'state')
-    list_display_links = ('firstname', 'secondname', 'group')
-    list_editable = ('state', )
-    search_fields = ('firstname', 'secondname', 'group', 'current_project__name_of_project')
-    sortable_by = ('secondname', 'group', 'state', 'current_project')
 
 admin.AdminSite.site_title = 'OPD projects'
 admin.AdminSite.site_header = 'Админ-панель сайта имени Руслана Внукова'
@@ -118,7 +112,6 @@ class ProjectReportMarkAdmin(admin.ModelAdmin):
 
 admin.site.register(ProjectReportMark, ProjectReportMarkAdmin)
 admin.site.register(Applications, ApplicationsAdmin)
-admin.site.register(TeamMember, TeamMemberAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectReport, ProjectReportAdmin)
 
