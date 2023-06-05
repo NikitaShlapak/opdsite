@@ -71,6 +71,7 @@ class CustomUser(AbstractUser):
     is_approved = models.BooleanField(default=False, verbose_name='Подтверждённый менеджер', help_text='Статус подтверждённого менеджера. Его проекты автоматически подтверждаются, а также выделяются особым значком в списке проектов.')
     is_Free = models.BooleanField(default=True)
 
+
     def __str__(self):
         if not self.get_full_name():
             return self.username

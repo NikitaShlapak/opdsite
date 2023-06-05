@@ -10,6 +10,8 @@ urlpatterns = [
     path('login/', views.LoginUser.as_view(), name='login'),
     path('logout/', views.logout, name='logout'),
 
+    path('login/vk/', views.LoginWithVkView.as_view(), name='login_vk'),
+
     path('profile/', views.ProfilePage.as_view(), name='profile'),
     #path('accounts/user/<int:user_id>', UserPage.as_view(), name='user'), TODO: add UserView class
     #path('accounts/user/<int:user_id>', UserPage.as_view(), name='user'), TODO: add UserUpdate class

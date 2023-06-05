@@ -1,5 +1,11 @@
 import logging
 import sys
+
+import requests
+import vk_api
+from django.http import HttpResponse
+from django.views.generic.base import View
+
 sys.path.append("..")
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
@@ -47,6 +53,22 @@ class LoginUser(DataMixin, LoginView):
         return context|c_def
     # def get_success_url(self):
     #     return reverse_lazy('MAIN')
+
+class LoginWithVkView(View):
+
+    def get(self, request, *args,**kwargs):
+        print(request.GET, args, kwargs, request.method, request,sep='\n')
+        if request.GET['code']:
+            data = {'code':request.GET['code'],
+                    'client_id':'51666712',
+                    'client_secret':'vl71x7P1SfdJ6pEwgQMM',
+                    'redirect_uri':'http://127.0.0.1:8000/accounts/login/vk/'}
+            print(data)
+            req = requests.get(url=f'https://oauth.vk.com/access_token', params=data)
+            print(req.json())
+        #vk_session = vk_api.VkApi('+71234567890', 'mypassword')
+        return HttpResponse('OK')
+    pass
 
 def logout(request):
     django_logout(request)

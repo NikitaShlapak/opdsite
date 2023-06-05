@@ -1,4 +1,5 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -7,12 +8,10 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
     <meta charset="UTF-8">
-    <script
-      type="text/javascript"
-      src="https://vk.com/js/api/openapi.js?168"
-      charset="windows-1251"
-    ></script>
-
+    {% block meta %}
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% endblock %}
     <title>{% block title %}Проекты | {{ title }} {% endblock %}</title>
 </head>
 <body>
@@ -29,13 +28,13 @@
     <ul class="nav nav-pills flex-column mb-auto sticky-top ">
         {% if not request.user.is_authenticated %}
         <li class="mt-2">
-            <a href="{% url 'user_accounts:login' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Войти</a>
-            <a href="{% url 'user_accounts:register' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Зарегистрироваться</a>
+            <a href="{% url 'account_login' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Войти</a>
+            <a href="{% url 'account_signup' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Зарегистрироваться</a>
         </li>
         {% else %}
         <li class="mt-2">
             {% if selected != 'profile' %}
-        <a href="{% url 'user_accounts:profile' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Личный кабинет</a>
+        <a href="{% url 'profile' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Личный кабинет</a>
             {% else %}
         <a href="" class="btn btn-outline-primary disabled mb-1 w-100" role="button">Личный кабинет</a>
             {% endif %}
@@ -202,7 +201,7 @@
 
 {% if request.user.is_authenticated %}
         <li>
-            <a href="{% url 'user_accounts:logout' %}" class="btn btn-outline-danger mt-1 w-100" role="button">Выйти</a>
+            <a href="{% url 'account_logout' %}" class="btn btn-outline-danger mt-1 w-100" role="button">Выйти</a>
         </li>
 {% endif %}
 
@@ -218,14 +217,12 @@
 
 
 <!-- Put this script tag to the place, where the Login block will be -->
-    <div id="vk_auth">
-        <a href="https://oauth.vk.com/authorize?client_id=51666712&display=popup&redirect_uri=http://127.0.0.1:8000{% url 'MAIN' %}&response_type=token" class="btn btn-primary">
-            login with Vk
-        </a>
-    </div>
-    <script type="text/javascript">
-      VK.Widgets.Auth("vk_auth", {onAuth: function(data) {alert('user '+data['uid']+' authorized');});
-    </script>
+    <!--    <div id="vk_auth" class="mt-5">-->
+    <!--        <a href="{{ login_with_vk_link }}" class="btn btn-primary">-->
+    <!--            login with Vk-->
+    <!--        </a>-->
+    <!--    </div>-->
+
   </div>
 </div>
 
@@ -253,8 +250,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
-<script type="text/javascript">
-  VK.init({ apiId: 51666712 });
-</script>
+
 </body>
 </html>

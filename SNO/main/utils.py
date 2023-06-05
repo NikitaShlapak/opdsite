@@ -4,6 +4,7 @@ from django.forms import CheckboxSelectMultiple
 
 
 from user_accounts.models import CustomUser, StudyGroup
+from .env import VK_ID, VK_LOGIN_REDIRECT_URI, VK_SCOPES
 from .forms import SearchForm, SearchNameForm
 from .models import Project
 from .standalone_utils import form_title
@@ -18,6 +19,9 @@ class DataMixin:
         if 'selected' not in context:
             context['selected'] = 'all'
         context['title'] = form_title(context['selected'])
+        context['login_with_vk_link'] = f'https://oauth.vk.com/authorize?client_id={VK_ID}&redirect_uri={VK_LOGIN_REDIRECT_URI}&response_type=code&v=5.131'
+        for scope in VK_SCOPES:
+            context['login_with_vk_link'] = context['login_with_vk_link'] + f'&scope={scope}'
         return context
 
 
