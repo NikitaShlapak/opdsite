@@ -89,6 +89,14 @@ class Project(models.Model):
     def get_team(self):
         return TeamMember.objects.filter(current_project=self.pk)
 
+    def get_team_str(self):
+        team = TeamMember.objects.filter(current_project=self.pk)
+        ans = ''
+        for tm in team:
+            if ans:
+                ans = ans + '\n'
+            ans = ans + f'{tm}'
+
     def is_approved(self):
         return self.manager.is_approved
 

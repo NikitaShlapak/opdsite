@@ -13,7 +13,7 @@ class TeamMemberAdmin(admin.ModelAdmin):
     sortable_by = ('secondname', 'group', 'state', 'current_project')
 
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('name_of_project',  'get_html_mark', 'manager','project_status')
+    list_display = ('name_of_project',  'get_html_mark','get_html_team', 'manager','project_status')
     list_display_links = ('name_of_project',)
     list_editable = ('project_status',)
     search_fields = ('name_of_project', 'manager__firstname', 'manager__secondname')
@@ -27,10 +27,11 @@ class ProjectAdmin(admin.ModelAdmin):
          "manager", "project_status", "project_type", 'implementation_period', 'target_groups', 'edition_key')}
          ),
         ("Данные о проекте",
-         {"fields": ("short_project_description", "long_project_description")}
+         {"fields": ("short_project_description", "long_project_description",'get_html_team',)}
          )
     )
-    readonly_fields = ('edition_key', 'get_html_poster','get_html_mark')
+    readonly_fields = ('edition_key', 'get_html_poster','get_html_mark','get_html_team',)
+
 
     def get_html_poster(self, object):
         return mark_safe(f"<img src={object.poster.url} height=400>")
@@ -42,6 +43,17 @@ class ProjectAdmin(admin.ModelAdmin):
         return mark_safe(f"{object.get_mark()} из 40 <br> Всего оценило: {marks_num}")
 
     get_html_mark.short_description = "Оценка"
+
+    def get_html_team(self, object):
+        team = TeamMember.objects.filter(current_project=object.pk)
+        ans = ''
+        for tm in team:
+            if ans:
+                ans = ans + '<br>'
+            ans = ans + f'{tm}'
+        return mark_safe(ans)
+
+    get_html_team.short_description = "Команда"
 
     actions = ['confirm_projects', 'close_projects']
 
