@@ -64,7 +64,7 @@ class LinkVkView(DataMixin, View):
         c_def = self.get_user_context(selected='register')
         return context | c_def
     def get(self, request, *args,**kwargs):
-        print(request.GET, request,sep='\n')
+        print(request.GET, request.read(),sep='\n')
         if request.GET:
             print('Запрос токена...\n',request.GET)
             if request.GET['code']:
@@ -81,12 +81,14 @@ class LinkVkView(DataMixin, View):
             print('Запрос кода...')
             data = {'client_id': VK_ID,
                     'redirect_uri': VK_LOGIN_REDIRECT_URI,
-                    'response_type':'code',
+                    'response_type':'token',
                     'v':'5.131',
                     'scope':VK_SCOPES,
                     }
             req = requests.get(url='https://oauth.vk.com/authorize', params=data)
             print('Адрес запроса:\n', req.url)
+
+            # print('Результат запроса:\n', req.text)
             return redirect(req.url)
         return HttpResponse('GET OK')
 
