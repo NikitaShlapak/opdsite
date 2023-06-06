@@ -9,7 +9,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main.urls')),
     path('events/', include('bot.urls', namespace='events')),
-    # path('accounts/', include('user_accounts.urls', namespace='user_accounts')),
+    path('acc/', include('user_accounts.urls', namespace='user_accounts')),
     path('accounts/', include('allauth.urls')),
     path('accounts/profile/', views.ProfilePage.as_view(), name='profile'),
 ]

@@ -2,9 +2,9 @@ import random
 
 from django.forms import CheckboxSelectMultiple
 
-
+from SNO.vk_env import VK_SCOPES, VK_ID, VK_LOGIN_REDIRECT_URI
 from user_accounts.models import CustomUser, StudyGroup
-from .env import VK_ID, VK_LOGIN_REDIRECT_URI, VK_SCOPES
+
 from .forms import SearchForm, SearchNameForm
 from .models import Project
 from .standalone_utils import form_title

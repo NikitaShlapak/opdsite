@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import StudyGroup, CustomUser
+from .models import StudyGroup, CustomUser, VKTokenConnection
 
 
 class CustomUserAdmin(UserAdmin):
@@ -60,5 +60,17 @@ class StudyGroupAdmin(admin.ModelAdmin):
         ("Данные о группе", {"fields": ("type", "subgroup", "year")}),
     )
 
+class VKTokenConnectionAdmin(admin.ModelAdmin):
+    list_display = ('email','user_id', 'expires_in', 'dt_created')
+    list_display_links = ('email', 'user_id')
+
+    readonly_fields = ('access_token'    , 'expires_in' , 'dt_created')
+
+    fieldsets = (
+        ('Основная информация', {"fields": ("email", "user_id", 'access_token')}),
+        ('Даты', {'fields':( 'expires_in', 'dt_created')} )
+    )
+
+admin.site.register(VKTokenConnection,VKTokenConnectionAdmin)
 admin.site.register(StudyGroup, StudyGroupAdmin)
 admin.site.register(CustomUser, CustomUserAdmin)

@@ -5,6 +5,9 @@ import requests
 import vk_api
 from django.http import HttpResponse
 from django.views.generic.base import View
+from django.views.generic.edit import FormView
+
+from .models import VKTokenConnection
 
 sys.path.append("..")
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -19,6 +22,7 @@ from .forms import CustomUserCreationForm, CustomUserAuthenticationForm
 from main.utils import DataMixin, get_all_unmarked_reports, get_all_report_marks
 from main.models import Project, Applications
 from main.forms import SearchForm
+from SNO.vk_env import VK_SCOPES, VK_ID, VK_LOGIN_REDIRECT_URI, VK_SECRET
 
 logging.basicConfig(level=logging.INFO, filename="main_views.log",filemode="a",
                     format="%(asctime)s %(levelname)s %(message)s")
@@ -54,21 +58,68 @@ class LoginUser(DataMixin, LoginView):
     # def get_success_url(self):
     #     return reverse_lazy('MAIN')
 
-class LoginWithVkView(View):
-
+class LinkVkView(DataMixin, View):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(selected='register')
+        return context | c_def
     def get(self, request, *args,**kwargs):
-        print(request.GET, args, kwargs, request.method, request,sep='\n')
-        if request.GET['code']:
-            data = {'code':request.GET['code'],
-                    'client_id':'51666712',
-                    'client_secret':'vl71x7P1SfdJ6pEwgQMM',
-                    'redirect_uri':'http://127.0.0.1:8000/accounts/login/vk/'}
-            print(data)
-            req = requests.get(url=f'https://oauth.vk.com/access_token', params=data)
-            print(req.json())
-        #vk_session = vk_api.VkApi('+71234567890', 'mypassword')
-        return HttpResponse('OK')
-    pass
+        print(request.GET, request,sep='\n')
+        if request.GET:
+            print('Запрос токена...\n',request.GET)
+            if request.GET['code']:
+                data = {'code':request.GET['code'],
+                        'client_id': VK_ID,
+                        'client_secret':VK_SECRET,
+                        'redirect_uri':VK_LOGIN_REDIRECT_URI}
+                print(data)
+                req = requests.get(url='https://oauth.vk.com/access_token', params=data)
+                print('Ответ на запрос токена:',req.json())
+                return self.post(request, **req.json())
+            #vk_session = vk_api.VkApi('+71234567890', 'mypassword')
+        else:
+            print('Запрос кода...')
+            data = {'client_id': VK_ID,
+                    'redirect_uri': VK_LOGIN_REDIRECT_URI,
+                    'response_type':'code',
+                    'v':'5.131',
+                    'scope':VK_SCOPES,
+                    }
+            req = requests.get(url='https://oauth.vk.com/authorize', params=data)
+            print('Адрес запроса:\n', req.url)
+            return redirect(req.url)
+        return HttpResponse('GET OK')
+
+    def post(self, request, *args, **kwargs):
+        print(kwargs)
+        connection, created = VKTokenConnection.objects.get_or_create(
+            user_id=kwargs.pop('user_id'),
+            defaults=kwargs
+        )
+        connection.save()
+        return redirect('user_accounts:signup_vk', vk_id=connection.user_id)
+        # return HttpResponse("POST OK")
+
+class SignupWithVKView(DataMixin, FormView):
+    form_class = CustomUserCreationForm
+    template_name = 'account/signup.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(selected='register')
+        return context | c_def
+    
+    def get(self, request, *args, **kwargs):
+        # print(request, args , kwargs)
+        vk_id = kwargs['vk_id']
+        connection = VKTokenConnection.objects.get(user_id=vk_id)
+        vk_session = vk_api.VkApi(token=connection.access_token)
+        vk = vk_session.get_api()
+        info = vk.account.getProfileInfo()
+        print(info)
+        return super().get(request, args, kwargs)
+
+
+
 
 def logout(request):
     django_logout(request)
