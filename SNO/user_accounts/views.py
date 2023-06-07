@@ -6,8 +6,9 @@ import vk_api
 from django.http import HttpResponse
 from django.views.generic.base import View
 from django.views.generic.edit import FormView
+from transliterate import translit
 
-from .models import VKTokenConnection
+from .models import VKTokenConnection, CustomUser
 
 sys.path.append("..")
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -64,7 +65,7 @@ class LinkVkView(DataMixin, View):
         c_def = self.get_user_context(selected='register')
         return context | c_def
     def get(self, request, *args,**kwargs):
-        print(request.GET, request.read(),sep='\n')
+        # print(request.GET, request.read(),sep='\n')
         if request.GET:
             print('Запрос токена...\n',request.GET)
             if request.GET['code']:
@@ -81,7 +82,7 @@ class LinkVkView(DataMixin, View):
             print('Запрос кода...')
             data = {'client_id': VK_ID,
                     'redirect_uri': VK_LOGIN_REDIRECT_URI,
-                    'response_type':'token',
+                    'response_type':'code',
                     'v':'5.131',
                     'scope':VK_SCOPES,
                     }
@@ -116,9 +117,28 @@ class SignupWithVKView(DataMixin, FormView):
         connection = VKTokenConnection.objects.get(user_id=vk_id)
         vk_session = vk_api.VkApi(token=connection.access_token)
         vk = vk_session.get_api()
-        info = vk.account.getProfileInfo()
+        info = vk.users.get(user_ids=connection.user_id)[0]
+        # print(info)
+        self.initial = {"first_name":info['first_name'],
+                        'last_name':info['last_name'],
+                        'email':connection.email,
+                        'username':translit(f"{info['first_name'].capitalize()}{info['last_name'].capitalize()}@{vk_id}", language_code='ru', reversed=True),
+                        }
         print(info)
         return super().get(request, args, kwargs)
+
+    def form_valid(self, form):
+        data = form.cleaned_data
+        print(data)
+        study_group = data.pop('study_group')
+        print(study_group)
+        try:
+            user = CustomUser.objects.create(**data)
+            print(user)
+        except:
+            pass
+        # return HttpResponse('OK')
+        return redirect('profile')
 
 
 
