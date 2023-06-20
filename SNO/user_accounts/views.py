@@ -103,16 +103,16 @@ class SignupWithVKView(DataMixin, FormView):
         try:
             user = CustomUser.objects.create(**data, password=password, study_group=study_group)
         except:
-            logging.ERROR('Can not create user')
+            logging.error('Can not create user')
         else:
             login(self.request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
-            logging.INFO(f'Usef {user} logged in. Trying to link VK profile...')
+            logging.info(f'User {user} logged in. Trying to link VK profile...')
             try:
                 connection = VKTokenConnection.objects.get(email=user.email)
             except:
-                logging.ERROR('VK connection does not exist!')
+                logging.error('VK connection does not exist!')
             else:
-                logging.INFO(f'Connection found: {connection.email=}, {connection.user_id=}')
+                logging.info(f'Connection found: {connection.email=}, {connection.user_id=}')
                 vk_session = vk_api.VkApi(token=connection.access_token)
                 vk = vk_session.get_api()
                 info = vk.users.get(user_ids=connection.user_id)[0]
@@ -121,7 +121,7 @@ class SignupWithVKView(DataMixin, FormView):
                     'provider':'vk',
                     'extra_data':info
                 })
-                logging.INFO(f'User {user} succesfully signed up, logged in and connection to vk_id @{connection.user_id} created')
+                logging.info(f'User {user} succesfully signed up, logged in and connection to vk_id @{connection.user_id} created')
         return redirect('profile')
 
 
