@@ -5,3 +5,4 @@ ALLOWED_CONTENT_TYPES =['application/pdf', #.pdf
                         'application/vnd.openxmlformats-officedocument.presentationml.presentation',#.pptx
                         'application/vnd.ms-powerpoint'#.ppt
 ]
+

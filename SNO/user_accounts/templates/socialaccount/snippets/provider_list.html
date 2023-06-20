@@ -1,0 +1,34 @@
+{% load socialaccount %}
+{% load static %}
+{% get_providers as socialaccount_providers %}
+
+{% for provider in socialaccount_providers %}
+{% if provider.id == "openid" %}
+{% for brand in provider.get_brands %}
+
+  <a title="{{brand.name}}" 
+     class="socialaccount_provider {{provider.id}} {{brand.id}}" 
+     href="{% provider_login_url provider.id openid=brand.openid_url process=process %}"
+     >
+
+
+
+  </a>
+
+{% endfor %}
+{% endif %}
+  <a title="{{provider.name}}" class="socialaccount_provider {{provider.id}} btn btn-outline-primary py-1 d-flex align-items-center justify-content-center"
+     href="{% provider_login_url provider.id process=process scope=scope auth_params=auth_params %}" style="min-width: 170px; width:10%">
+      <img class="bi mx-1" width="40" height="40" src="{% static 'main\images\logos\vk.svg' %}">
+      <span class="fs-4 mx-1">
+
+              {% if provider.name != 'VK' %}
+              {{provider.name}}
+              {% else %}
+              Вконтакте
+              {% endif %}
+
+      </span>
+  </a>
+
+{% endfor %}

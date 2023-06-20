@@ -6,11 +6,10 @@ from . import views
 app_name = "user_accounts"
 
 urlpatterns = [
-    path('register/', views.RegisterUser.as_view(), name='register'),
-    path('login/', views.LoginUser.as_view(), name='login'),
-    path('logout/', views.logout, name='logout'),
+    path('link/vk/', views.LinkVkView.as_view(), name='link_vk'),
+    path('signup/vk/<int:vk_id>', views.SignupWithVKView.as_view(), name='signup_vk'),
+    path('signup/vk/complete', views.SignupWithVKView.as_view(), name='signup_vk_complete'),
 
-    path('profile/', views.ProfilePage.as_view(), name='profile'),
     #path('accounts/user/<int:user_id>', UserPage.as_view(), name='user'), TODO: add UserView class
     #path('accounts/user/<int:user_id>', UserPage.as_view(), name='user'), TODO: add UserUpdate class
     #path('accounts/user/<int:user_id>', UserPage.as_view(), name='user'), TODO: add UserDelete class

@@ -2,8 +2,10 @@ import random
 
 from django.forms import CheckboxSelectMultiple
 
-
+from SNO.settings import SNO_EVENTS_ACTIVE
+from SNO.vk_env import VK_SCOPES, VK_ID, VK_LOGIN_REDIRECT_URI
 from user_accounts.models import CustomUser, StudyGroup
+
 from .forms import SearchForm, SearchNameForm
 from .models import Project
 from .standalone_utils import form_title
@@ -15,9 +17,13 @@ class DataMixin:
         context = kwargs
         context['group_form'] = SearchForm()
         context['name_form'] = SearchNameForm()
+        context['events_active'] = SNO_EVENTS_ACTIVE
         if 'selected' not in context:
             context['selected'] = 'all'
         context['title'] = form_title(context['selected'])
+        context['login_with_vk_link'] = f'https://oauth.vk.com/authorize?client_id={VK_ID}&redirect_uri={VK_LOGIN_REDIRECT_URI}&response_type=code&v=5.131'
+        for scope in VK_SCOPES:
+            context['login_with_vk_link'] = context['login_with_vk_link'] + f'&scope={scope}'
         return context
 
 

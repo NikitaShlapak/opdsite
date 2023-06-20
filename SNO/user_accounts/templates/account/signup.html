@@ -1,0 +1,57 @@
+{% extends "account/base.html" %}
+
+{% load socialaccount %}
+{% load i18n %}
+{% load static %}
+
+{% block head_title %}{% trans "Signup" %}{% endblock %}
+
+{% block content %}
+<h1>{% trans "Sign Up" %}</h1>
+
+<p>{% blocktrans %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktrans %}</p>
+
+<form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+  {% csrf_token %}
+   {% for f in form %}
+    {{ f.errors }}
+
+
+                <div class="input-group mb-3">
+                  <span class="input-group-text w-25">
+                          <label for="{{ f.id_for_label }}" class="form-label">{{ f.label }}</label>
+                  </span>
+
+                  {{ f }}
+
+                </div>
+
+
+        {% endfor %}
+  {% if redirect_field_value %}
+  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+  {% endif %}
+  <button type="submit" class="btn btn-primary">{% trans "Sign Up" %} &raquo;</button>
+</form>
+<hr>
+<h3>Или</h3>
+<p>Зарегистрируйтесь с помощью</p>
+{% get_providers as socialaccount_providers %}
+
+{% for provider in socialaccount_providers %}
+    <a title="{{provider.name}}" class="socialaccount_provider {{provider.id}} btn btn-outline-primary py-1 d-flex align-items-center justify-content-center"
+         href="{% url 'user_accounts:link_vk' %}" style="min-width: 170px; width:10%">
+          <img class="bi mx-1" width="40" height="40" src="{% static 'main\images\logos\vk.svg' %}">
+          <span class="fs-4 mx-1">
+
+                  {% if provider.name != 'VK' %}
+                  {{provider.name}}
+                  {% else %}
+                  Вконтакте
+                  {% endif %}
+
+          </span>
+      </a>
+{% endfor %}
+
+{% endblock %}
