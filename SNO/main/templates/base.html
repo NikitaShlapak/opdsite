@@ -42,12 +42,17 @@
 
 
 
-
+            {% if events_active %}
+                <li>
+                    <a href="{% url 'events:home' %}" class="btn btn-outline-success mb-1 w-100" role="button">Мероприятия СНО</a>
+                </li>
+            {% endif %}
             {% if request.user.is_staff %}
                 <li>
                     <a href="{% url 'admin:index' %}" class="btn btn-outline-primary mb-1 w-100" role="button">Панель администратора</a>
                 </li>
             {% endif %}
+
 
         {% endif %}
 
@@ -216,12 +221,6 @@
         {% endblock %}
 
 
-<!-- Put this script tag to the place, where the Login block will be -->
-    <!--    <div id="vk_auth" class="mt-5">-->
-    <!--        <a href="{{ login_with_vk_link }}" class="btn btn-primary">-->
-    <!--            login with Vk-->
-    <!--        </a>-->
-    <!--    </div>-->
 
   </div>
 </div>

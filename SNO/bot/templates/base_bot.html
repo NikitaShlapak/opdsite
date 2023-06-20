@@ -24,7 +24,7 @@
       <hr>
       <ul class="nav nav-pills flex-column mb-auto">
         <li class="nav-item mb-1">
-          <a href="#" class="nav-link bg-light text-dark mb-1" aria-current="page">
+          <a href="{% url 'events:main' %}" class="nav-link bg-light text-dark mb-1" aria-current="page">
             Главная
           </a>
         </li>
@@ -63,15 +63,15 @@
         <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
           <li><a class="dropdown-item" href="{% url 'events:home' %}">Профиль</a></li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="{% url 'user_accounts:logout' %}">Выйти</a></li>
+          <li><a class="dropdown-item" href="{% url 'account_logout' %}">Выйти</a></li>
         </ul>
         {% else %}
         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
           <strong class="me-2">Аккаунт</strong>
         </a>
         <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-          <li><a class="dropdown-item" href="{% url 'user_accounts:login' %}">Войти</a></li>
-          <li><a class="dropdown-item" href="{% url 'user_accounts:register' %}">Зарегистрироваться</a></li>
+          <li><a class="dropdown-item" href="{% url 'account_login' %}">Войти</a></li>
+          <li><a class="dropdown-item" href="{% url 'account_signup' %}">Зарегистрироваться</a></li>
         </ul>
         {% endif %}
       </div>

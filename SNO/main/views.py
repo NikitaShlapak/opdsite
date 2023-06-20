@@ -8,6 +8,7 @@ from django.template.loader import render_to_string
 from django.views import View
 from django.views.generic import UpdateView, CreateView, DetailView, TemplateView, FormView
 
+from SNO.settings import SNO_EVENTS_ACTIVE
 from .env import MAX_UPLOAD_FILE_SIZE, ALLOWED_CONTENT_TYPES
 from .forms import *
 
@@ -55,6 +56,7 @@ def Main(request):
         'group_form': group_form,
         'text': text,
         'name_form': name_form,
+        'events_active': SNO_EVENTS_ACTIVE
     }
     data['title']= form_title(data['selected'])
 
@@ -91,6 +93,7 @@ def MainFiltered(request, type):
         'group_form': group_form,
         'text': text,
         'name_form': name_form,
+        'events_active': SNO_EVENTS_ACTIVE
     }
     data['title'] = form_title(data['selected'])
     return render(request, 'main/index.html', context=data)
@@ -101,7 +104,8 @@ def Info(request):
     group_form = SearchForm()
     data = {
         'group_form': group_form,
-        'selected': 'info'
+        'selected': 'info',
+        'events_active': SNO_EVENTS_ACTIVE
     }
     data['title'] = form_title(data['selected'])
     return render(request, 'main/info.html', context=data)

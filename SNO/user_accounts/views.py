@@ -37,25 +37,7 @@ def page_not_found_view(request, exception):
     return render(request,'404.html', context=data)
 
 
-class RegisterUser(DataMixin, CreateView):
-    form_class = CustomUserCreationForm
-    template_name = "main/register+login.html"
-    success_url = reverse_lazy('user_accounts:login')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(selected='register')
-        return context|c_def
-
-
-class LoginUser(DataMixin, LoginView):
-    form_class = CustomUserAuthenticationForm
-    template_name = 'main/register+login.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(selected='login')
-        return context|c_def
 
 
 class LinkVkView(DataMixin, View):

@@ -9,7 +9,7 @@ class BotManageView(ListView):
     template_name = 'bot/bot_index.html'
     model = Event
     context_object_name = 'events'
-    paginate_by = 1
+    paginate_by = 12
 
 
 class BotProfileView(LoginRequiredMixin ,TemplateView):
@@ -17,3 +17,4 @@ class BotProfileView(LoginRequiredMixin ,TemplateView):
 
     def handle_no_permission(self):
         return redirect('user_accounts:login')
+
