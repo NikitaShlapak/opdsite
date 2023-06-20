@@ -3,6 +3,7 @@ import sys
 
 import requests
 import vk_api
+from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse
 from django.views.generic.base import View
 from django.views.generic.edit import FormView
@@ -16,8 +17,7 @@ from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView
-from django.contrib.auth import logout as django_logout
-
+from django.contrib.auth import logout as django_logout, login
 
 from .forms import CustomUserCreationForm, CustomUserAuthenticationForm
 from main.utils import DataMixin, get_all_unmarked_reports, get_all_report_marks
@@ -56,8 +56,7 @@ class LoginUser(DataMixin, LoginView):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(selected='login')
         return context|c_def
-    # def get_success_url(self):
-    #     return reverse_lazy('MAIN')
+
 
 class LinkVkView(DataMixin, View):
     def get_context_data(self, **kwargs):
@@ -65,21 +64,15 @@ class LinkVkView(DataMixin, View):
         c_def = self.get_user_context(selected='register')
         return context | c_def
     def get(self, request, *args,**kwargs):
-        # print(request.GET, request.read(),sep='\n')
         if request.GET:
-            print('Запрос токена...\n',request.GET)
             if request.GET['code']:
                 data = {'code':request.GET['code'],
                         'client_id': VK_ID,
                         'client_secret':VK_SECRET,
                         'redirect_uri':VK_LOGIN_REDIRECT_URI}
-                print(data)
                 req = requests.get(url='https://oauth.vk.com/access_token', params=data)
-                print('Ответ на запрос токена:',req.json())
                 return self.post(request, **req.json())
-            #vk_session = vk_api.VkApi('+71234567890', 'mypassword')
         else:
-            print('Запрос кода...')
             data = {'client_id': VK_ID,
                     'redirect_uri': VK_LOGIN_REDIRECT_URI,
                     'response_type':'code',
@@ -87,9 +80,6 @@ class LinkVkView(DataMixin, View):
                     'scope':VK_SCOPES,
                     }
             req = requests.get(url='https://oauth.vk.com/authorize', params=data)
-            print('Адрес запроса:\n', req.url)
-
-            # print('Результат запроса:\n', req.text)
             return redirect(req.url)
         return HttpResponse('GET OK')
 
@@ -101,43 +91,55 @@ class LinkVkView(DataMixin, View):
         )
         connection.save()
         return redirect('user_accounts:signup_vk', vk_id=connection.user_id)
-        # return HttpResponse("POST OK")
 
 class SignupWithVKView(DataMixin, FormView):
     form_class = CustomUserCreationForm
-    template_name = 'account/signup.html'
+    template_name = 'socialaccount/signup.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(selected='register')
         return context | c_def
     
     def get(self, request, *args, **kwargs):
-        # print(request, args , kwargs)
         vk_id = kwargs['vk_id']
         connection = VKTokenConnection.objects.get(user_id=vk_id)
         vk_session = vk_api.VkApi(token=connection.access_token)
         vk = vk_session.get_api()
         info = vk.users.get(user_ids=connection.user_id)[0]
-        # print(info)
         self.initial = {"first_name":info['first_name'],
                         'last_name':info['last_name'],
                         'email':connection.email,
                         'username':translit(f"{info['first_name'].capitalize()}{info['last_name'].capitalize()}@{vk_id}", language_code='ru', reversed=True),
                         }
-        print(info)
         return super().get(request, args, kwargs)
 
     def form_valid(self, form):
         data = form.cleaned_data
-        print(data)
         study_group = data.pop('study_group')
-        print(study_group)
+        password = data.pop('password1')
+        data.pop('password2')
         try:
-            user = CustomUser.objects.create(**data)
-            print(user)
+            user = CustomUser.objects.create(**data, password=password, study_group=study_group)
         except:
-            pass
-        # return HttpResponse('OK')
+            logging.ERROR('Can not create user')
+        else:
+            login(self.request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
+            logging.INFO(f'Usef {user} logged in. Trying to link VK profile...')
+            try:
+                connection = VKTokenConnection.objects.get(email=user.email)
+            except:
+                logging.ERROR('VK connection does not exist!')
+            else:
+                logging.INFO(f'Connection found: {connection.email=}, {connection.user_id=}')
+                vk_session = vk_api.VkApi(token=connection.access_token)
+                vk = vk_session.get_api()
+                info = vk.users.get(user_ids=connection.user_id)[0]
+                acc, created = SocialAccount.objects.get_or_create(uid=connection.user_id, defaults={
+                    'user':user,
+                    'provider':'vk',
+                    'extra_data':info
+                })
+                logging.INFO(f'User {user} succesfully signed up, logged in and connection to vk_id @{connection.user_id} created')
         return redirect('profile')
 
 
@@ -164,9 +166,7 @@ class ProfilePage(DataMixin, LoginRequiredMixin, ListView):
         my_project_ids=[]
         for project in my_projects:
             my_project_ids.append(project.pk)
-        # print(my_project_ids)
         context['managed_applies'] = Applications.objects.filter(project__pk__in=my_project_ids).order_by('-pk')
-        # print(len(context['managed_applies']))
         unmarked_reports = []
         for project in Project.objects.all():
             if get_all_unmarked_reports(self.request.user,project):
