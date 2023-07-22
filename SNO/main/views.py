@@ -219,13 +219,11 @@ class ProjectUpdateView(DataMixin, LoginRequiredMixin, UpdateView):
         if len(form.cleaned_data['long_project_description']) > len(form.cleaned_data['short_project_description']):
             try:
                 Project.objects.filter(pk=project.pk).update(**form.cleaned_data)
-                if project.project_status == Project.ProjectStatus.REJECTED:
-                    project.project_status = Project.ProjectStatus.UNDERREVIEW
-                    project.save()
+                project.project_status = Project.ProjectStatus.UNDERREVIEW
                 if list(old_groups) != list(new_groups):
                     project.target_groups.clear()
                     project.target_groups.add(*new_groups)
-                    project.save()
+                project.save()
             except:
                 logging.error(f"Can not update project {project}. User: {self.request.user.username}")
                 return redirect('project', project.pk)
@@ -242,12 +240,12 @@ class ProjectUpdateView(DataMixin, LoginRequiredMixin, UpdateView):
         c_def = self.get_user_context(selected='register')
         return context | c_def
 
-    def handle_no_permission(self):
-        return redirect('user_accounts:login')
+    # def handle_no_permission(self):
+    #     return redirect('user_accounts:login')
 
 class SetProjectStatusView(DataMixin, LoginRequiredMixin, View):
-    def handle_no_permission(self):
-        return redirect('user_accounts:login')
+    # def handle_no_permission(self):
+    #     return redirect('user_accounts:login')
     def get(self, request, **kwargs):
         project = get_object_or_404(Project,pk=kwargs['project_id'])
         if not (request.user.is_staff or request.user.is_superuser):
@@ -265,7 +263,7 @@ class SetProjectStatusView(DataMixin, LoginRequiredMixin, View):
                     return redirect('MAIN')
                 else:
                     logging.info(f"Successfully deleted project {project} by {request.user.username}")
-                    return redirect('user_accounts:profile')
+                    return redirect('profile')
             try:
                 project.project_status = status
                 project.save()
@@ -297,8 +295,8 @@ class RejectProjectView(DataMixin, LoginRequiredMixin, DetailView, FormView):
         self.extra_context['project'] = context['p']
         return context
 
-    def handle_no_permission(self):
-        return redirect('user_accounts:login')
+    # def handle_no_permission(self):
+    #     return redirect('user_accounts:login')
 
     def form_valid(self, form):
         data = form.cleaned_data
@@ -309,8 +307,8 @@ class RejectProjectView(DataMixin, LoginRequiredMixin, DetailView, FormView):
             'title': f"Изменение статуса проекта {project.name_of_project}",
             'text': [f'Ваш проект {project.name_of_project} был отклонён']
         }
-        if not data['hide_name']:
-            letter_context['text'][0] = letter_context['text'][0] + f" пользователем {user.get_full_name()}"
+
+        letter_context['text'][0] = letter_context['text'][0] + f" пользователем {user.get_full_name()}"
         letter_context['text'][0] = letter_context['text'][0] + '.'
         letter_context['text'].append(f"Причина:\n{data['reason']}.")
         letter_context['text'].append(f"Комментарий:\n{data['comment']}.")
@@ -344,8 +342,8 @@ class CreateApplication(DataMixin, LoginRequiredMixin, TemplateView):
 
         c_def = self.get_user_context()
         return context|c_def
-    def handle_no_permission(self):
-        return redirect('user_accounts:login')
+    # def handle_no_permission(self):
+    #     return redirect('user_accounts:login')
     def get(self, request, **kwargs):
         project = Project.objects.get(pk=kwargs['project_id'])
         context = self.get_context_data(selected=project.project_type,project=project)
@@ -373,8 +371,8 @@ class CreateApplication(DataMixin, LoginRequiredMixin, TemplateView):
         return render(request, self.template_name, context=context)
 
 class ConfirmOrDeclineApplication(DataMixin,LoginRequiredMixin,TemplateView):
-    def handle_no_permission(self):
-        return redirect('user_accounts:login')
+    # def handle_no_permission(self):
+    #     return redirect('user_accounts:login')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user']=self.request.user
@@ -419,7 +417,7 @@ class ConfirmOrDeclineApplication(DataMixin,LoginRequiredMixin,TemplateView):
         else:
             logging.info(f"{manager} tried to fuck YOU! (attempt to {kwargs['action']} an application {app=}")
             self.handle_no_permission()
-        return redirect('user_accounts:profile')
+        return redirect('profile')
 
 
 
@@ -460,8 +458,8 @@ class ReportCreateView(DataMixin, LoginRequiredMixin,DetailView, FormView):
         context = context | c_def
         return context
 
-    def handle_no_permission(self):
-        return redirect('user_accounts:login')
+    # def handle_no_permission(self):
+    #     return redirect('user_accounts:login')
 
     def form_valid(self, form):
         if not (self.request.user in self.project.team.all() or self.project.manager == self.request.user):
@@ -506,8 +504,8 @@ class ProjectReportMarkUpdateView(DataMixin, LoginRequiredMixin, FormView):
         context = context | c_def
         return context
 
-    def handle_no_permission(self):
-        return redirect('user_accounts:login')
+    # def handle_no_permission(self):
+    #     return redirect('user_accounts:login')
 
 
     def post(self, request, *args, **kwargs):

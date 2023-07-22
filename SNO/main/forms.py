@@ -96,27 +96,27 @@ class ProjectEditForm(forms.ModelForm):
 class ProjectRejectForm(forms.Form):
    reason = forms.CharField(label="Причина отклонения",max_length=125, widget=forms.TextInput(attrs={'class': 'form-control'}))
    comment = forms.CharField(label="Комментарий", widget=forms.Textarea(attrs={'rows': 3,'class': 'form-control'}))
-   hide_name = forms.BooleanField(label='Скрыть моё имя в письме куратору',widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),required=False)
-
-   class Meta:
-        model = Project
-        fields = ['name_of_project', 'project_type', 'target_groups',
-                  'implementation_period', 'short_project_description', 'long_project_description', ]
-        widgets = {
-            'name_of_project': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Проект проект"}),
-            'target_groups': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Учебные группы, для которых предназначен проект"}),
-            'short_project_description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Краткое (до 150 символов) описание проекта"}),
-
-            'long_project_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3,
-                                                              'placeholder': "Полное описание проекта. \nНе сдерживайте себя!\nПрямо совсем не сдерживайте"}),
 
 
-
-            'project_type': forms.Select(attrs={'class': 'form-control'}),
-            'implementation_period': forms.Select(attrs={'class': 'form-control'}),
-
-
-        }
+   # class Meta:
+   #      model = Project
+   #      fields = ['name_of_project', 'project_type', 'target_groups',
+   #                'implementation_period', 'short_project_description', 'long_project_description', ]
+   #      widgets = {
+   #          'name_of_project': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Проект проект"}),
+   #          'target_groups': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Учебные группы, для которых предназначен проект"}),
+   #          'short_project_description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Краткое (до 150 символов) описание проекта"}),
+   #
+   #          'long_project_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3,
+   #                                                            'placeholder': "Полное описание проекта. \nНе сдерживайте себя!\nПрямо совсем не сдерживайте"}),
+   #
+   #
+   #
+   #          'project_type': forms.Select(attrs={'class': 'form-control'}),
+   #          'implementation_period': forms.Select(attrs={'class': 'form-control'}),
+   #
+   #
+   #      }
 
 
 class ProjectReportForm(forms.ModelForm):
