@@ -129,7 +129,7 @@ class SignupWithVKView(DataMixin, FormView):
 
 def logout(request):
     django_logout(request)
-    return redirect('user_accounts:login')
+    return redirect('login')
 
 class ProfilePage(DataMixin, LoginRequiredMixin, ListView):
     template_name = 'user_accounts/profile_page.html'
@@ -166,6 +166,4 @@ class ProfilePage(DataMixin, LoginRequiredMixin, ListView):
         c_def = self.get_user_context(selected='profile')
         return context|c_def
 
-    def handle_no_permission(self):
-        return redirect('user_accounts:login')
 
