@@ -8,7 +8,7 @@
 
 {% if p.manager == request.user or request.user.is_staff %}
 <div class="row">
-    <div class="col-9">
+    <div class="col-xl-9">
 {% endif %}
             <div class="card">
               <div class="card-header">
@@ -23,7 +23,15 @@
                             <p class="text text-primary my-0"><i>Проект с проверенным менеджером</i></p>
                         {% endif %}
                     </div>
-
+                      {% if p.manager == request.user or request.user.is_staff %}
+                      <div class="col-auto">
+                          <button class="btn btn-primary d-xl-none"
+                            type="button"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasResponsivePanel"
+                            aria-controls="offcanvasResponsivePanel">Управление проектом</button>
+                      </div>
+                        {% endif %}
                   </div>
               </div>
               <h3 class="card-title px-2">Тип проекта: {{ p.get_project_type_display }} </h3>
@@ -163,17 +171,23 @@
                   {% endif %}
               </div>
             </div>
-
-{% if p.manager == request.user or request.user.is_staff %}
     </div>
-    <div class="col-3">
-        <div class="card sticky-top">
+{% if p.manager == request.user or request.user.is_staff %}
+<div class="col-xl-3">
+    <div class="offcanvas-xl offcanvas-end  p-0 " data-bs-backdrop="false" data-bs-scroll="true" tabindex="-1" id="offcanvasResponsivePanel" aria-labelledby="offcanvasResponsiveLabel">
+      <div class="offcanvas-header bg-primary">
+        <h5 class="offcanvas-title text-white" id="offcanvasResponsiveLabel">Управление проектом</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#offcanvasResponsivePanel" aria-label="Close"></button>
+      </div>
+
+      <div class="offcanvas-body d-block">
+
+
+        <div class="card sticky-top  ">
             <div class="card-header">
-                <h4>Панель управления</h4>
+                <h5>Действия с проектом</h5>
             </div>
             <div class="card-body p-1">
-                <div class="border border-2 rounded-2 px-2 py-1">
-                    <h5>Управление проектом:</h5>
                     {% if p.project_status == 'under_review' or p.project_status == 'rejected' or request.user.is_superuser %}
                         <a href="{% url 'edit' p.pk %}" role="button" class="btn btn-outline-success w-100 mt-2">Редактировать</a>
                     {% endif %}
@@ -201,31 +215,34 @@
                     <br>
                     <a href="{% url 'set_project_status' p.pk 'delete' %}" role="button" class="btn btn-danger w-100 mt-2">Удалить</a>
                     {% endif %}
-                </div>
-                {% if applyies %}
-                    <div class="border border-2 rounded-2 px-2 py-1 mt-2">
-                        <h5>Заявки:</h5>
-                        {% for ap in applyies %}
-                        <hr class="my-0">
-                            <div class="row px-1">
-                                <div class="col border-end pt-2">
-                                    <a href="" class="align-middle text-decoration-none ">{{ap.user}}</a>
-                                </div>
-                                <div class="col-auto border-end px-1">
-                                    <a href="{% url 'apply_or_decline' ap.pk 'confirm' %}">
-                                        <img src="{% static 'main\images\confirm.svg' %}" alt="confirm" height="45px" >
-                                    </a>
-                                </div>
-                                <div class="col-auto ps-1 pe-2 ">
-                                    <a href="{% url 'apply_or_decline' ap.pk 'delete' %}">
-                                        <img src="{% static 'main\images\decline.svg' %}" alt="decline" height="45px">
-                                    </a>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
             </div>
+        </div>
+    {% if applyies %}
+        <div class="card p-0 mt-2  ">
+            <div class="card-header">
+                <h5>Заявки</h5>
+            </div>
+            {% for ap in applyies %}
+            <hr class="my-0">
+                <div class="row px-1">
+                    <div class="col border-end pt-2">
+                        <a href="" class="align-middle text-decoration-none ">{{ap.user}}</a>
+                    </div>
+                    <div class="col-auto border-end px-1">
+                        <a href="{% url 'apply_or_decline' ap.pk 'confirm' %}">
+                            <img src="{% static 'main\images\confirm.svg' %}" alt="confirm" height="45px" >
+                        </a>
+                    </div>
+                    <div class="col-auto ps-1 pe-2 ">
+                        <a href="{% url 'apply_or_decline' ap.pk 'delete' %}">
+                            <img src="{% static 'main\images\decline.svg' %}" alt="decline" height="45px">
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
         </div>
     </div>
 </div>

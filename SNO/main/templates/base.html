@@ -18,11 +18,7 @@
 
 
 
-<!--<button class="btn btn-primary d-md-none"-->
-<!--        type="button"-->
-<!--        data-bs-toggle="offcanvas"-->
-<!--        data-bs-target="#offcanvasResponsive"-->
-<!--        aria-controls="offcanvasResponsive">Toggle offcanvas</button>-->
+
 
 <nav class="navbar navbar-expand-md d-md-none sticky-top  bg-primary border-bottom border-bottom-dark" >
   <div class="container-fluid">
@@ -53,10 +49,10 @@
 </nav>
 
 
-<div class="row w-100 p-0">
+<div class="row w-100 p-0 m-0">
     <div class="offcanvas-md offcanvas-start col-md-3 p-0" tabindex="-1" id="offcanvasResponsive" aria-labelledby="offcanvasResponsiveLabel">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasResponsiveLabel">Навигация</h5>
+      <div class="offcanvas-header bg-primary">
+        <h5 class="offcanvas-title text-white" id="offcanvasResponsiveLabel">Навигация</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#offcanvasResponsive" aria-label="Close"></button>
       </div>
 
@@ -269,7 +265,7 @@
 
         {% if request.user.is_authenticated %}
                 <li>
-                    <a href="{% url 'account_logout' %}" class="btn btn-outline-danger mt-1 w-100" role="button">Выйти</a>
+                    <a href="{% url 'account_logout' %}" class="btn btn-outline-danger mt-1 w-100" role="button">Выйти из аккаунта</a>
                 </li>
         {% endif %}
 
