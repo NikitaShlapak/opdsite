@@ -18,19 +18,49 @@
 
 
 
-<button class="btn btn-primary d-md-none"
-        type="button"
-        data-bs-toggle="offcanvas"
-        data-bs-target="#offcanvasResponsive"
-        aria-controls="offcanvasResponsive">Toggle offcanvas</button>
+<!--<button class="btn btn-primary d-md-none"-->
+<!--        type="button"-->
+<!--        data-bs-toggle="offcanvas"-->
+<!--        data-bs-target="#offcanvasResponsive"-->
+<!--        aria-controls="offcanvasResponsive">Toggle offcanvas</button>-->
+
+<nav class="navbar navbar-expand-md d-md-none sticky-top  bg-primary border-bottom border-bottom-dark" >
+  <div class="container-fluid">
+      <button class="navbar-toggler py-2 px-3" type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#offcanvasResponsive"
+            aria-controls="offcanvasResponsive"
+            aria-expanded="false" aria-label="Toggle navigation"
+            >
+
+      Навигация
+    </button>
+     {% if not request.user.is_authenticated %}
+    <p class="navbar-text my-2">Вы не авторизованы
+      <a class="navbar-brand px-2 mx-0" href="{% url 'account_signup' %}">Регистрация</a> |
+      <a class="navbar-brand px-2 mx-0" href="{% url 'account_login' %}">Войти</a>
+    </p>
+      {% else %}
+    <p class="navbar-text my-2"><i><u>{{ request.user.username }}</u></i>:
+      <a class="navbar-brand px-2 mx-0" href="{% url 'profile' %}">Профиль</a> |
+      <a class="navbar-brand px-2 mx-0" href="{% url 'account_logout' %}">Выйти</a>
+    </p>
+        {% endif %}
+
+
+
+  </div>
+</nav>
+
 
 <div class="row w-100 p-0">
     <div class="offcanvas-md offcanvas-start col-md-3 p-0" tabindex="-1" id="offcanvasResponsive" aria-labelledby="offcanvasResponsiveLabel">
       <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasResponsiveLabel">Responsive offcanvas</h5>
+        <h5 class="offcanvas-title" id="offcanvasResponsiveLabel">Навигация</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#offcanvasResponsive" aria-label="Close"></button>
       </div>
-      <div class="offcanvas-body h-100">
+
+      <div class="offcanvas-body text-bg-light h-100 p-0">
 
 
 
@@ -344,6 +374,30 @@
 .custom-nav-link{
     color:black;
     font-weight: 600;
+}
+
+.navbar-brand,.navbar-toggler{
+    color:white;
+    font-weight: 600;
+    border: 2px solid rgba(0,0,0,0);
+    border-radius: var(--bs-navbar-toggler-border-radius);
+}
+
+.navbar-text,.navbar-text a, .navbar-text a:focus, .navbar-text a:hover{
+    color:white;
+    font-weight: 600;
+}
+
+
+
+
+.navbar-brand:hover,
+.navbar-brand:focus,
+.navbar-toggler:hover,
+.navbar-toggler:focus{
+    color:white;
+    background-color: var(--bs-nav-pills-link-active-bg);
+    border: 2px solid white
 }
 
 
