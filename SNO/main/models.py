@@ -23,8 +23,8 @@ class Project(models.Model):
     project_type = models.CharField('Тип проекта',max_length=100, choices=ProjectType.choices)
     manager = models.ForeignKey(CustomUser, verbose_name='Руководитель проекта', on_delete=models.CASCADE,
                                 max_length=50, related_name='manager')
-
-    target_groups = models.ManyToManyField(StudyGroup, verbose_name='Учебные группы исполнителей',limit_choices_to=~Q(type__in=[StudyGroup.StudyGroupType.TEACHER,StudyGroup.StudyGroupType.OUTSIDER]))
+    possible_target_groups = (~Q(type__in=[StudyGroup.StudyGroupType.TEACHER,StudyGroup.StudyGroupType.OUTSIDER])) & Q(subgroup__in=(0,1))
+    target_groups = models.ManyToManyField(StudyGroup, verbose_name='Учебные группы исполнителей',limit_choices_to=possible_target_groups)
 
 
     class ImplementationPeriod(models.TextChoices):

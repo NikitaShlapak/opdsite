@@ -1,13 +1,13 @@
 {% with id=widget.attrs.id %}
-  <div{% if id %} id="{{ id }}"{% endif %}{% if widget.attrs.class %} class="{{ widget.attrs.class }} border border-2 border-danger"{% endif %}>
+  <div{% if id %} id="{{ id }}"{% endif %}class="{% if widget.attrs.class %}{{ widget.attrs.class }}{% endif %} d-flex flex-wrap mb-2 mx-2">
     {% for group, options, index in widget.optgroups %}
       {% if group %}
         <div class="border border-2 border-dark">123<label>{{ group }}</label>
       {% endif %}
       {% for option in options %}
-        <span class="p-2">
+        <div class="p-1 options" style="width:120px">
           {% include option.template_name with widget=option %}
-        </span>
+        </div>
       {% endfor %}
       {% if group %}
         </div>
