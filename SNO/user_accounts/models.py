@@ -63,6 +63,20 @@ class StudyGroup(models.Model):
     timetable_id = models.IntegerField(default=111, verbose_name='id группы в расписании')
     is_foreigns = models.BooleanField(default=False, verbose_name='Иностранцы')
 
+    def short_str(self):
+        ans = self.type
+        if not self.type in [self.StudyGroupType.OUTSIDER, self.StudyGroupType.TEACHER]:
+            app_sub = ''
+            app_num = ''
+            app_type = f'-{self.course}{int(self.year) % 1000}'
+
+            if self.numgroup:
+                app_num = self.numgroup
+
+            ans = ans + f"{app_num}{app_type}{app_sub}"
+            if self.is_foreigns:
+                ans = ans + 'и'
+        return ans
     def __str__(self):
         ans = self.type
         if not self.type in [self.StudyGroupType.OUTSIDER, self.StudyGroupType.TEACHER]:
@@ -76,6 +90,8 @@ class StudyGroup(models.Model):
             ans = ans + f"{app_num}{app_type}{app_sub}"
             if self.is_foreigns:
                 ans = ans+'и'
+            if self.subgroup:
+                ans = ans + f" (подгруппа {self.subgroup})"
         return ans
 
     def get_timetable_link(self):

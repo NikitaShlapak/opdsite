@@ -47,20 +47,29 @@ class CustomUserAdmin(UserAdmin):
 class StudyGroupAdmin(admin.ModelAdmin):
     def get_str(self, object):
         ans = f"{object.__str__()}"
-        if not object.type in [StudyGroup.StudyGroupType.OUTSIDER, StudyGroup.StudyGroupType.TEACHER]:
-            ans = ans + f" (подгруппа {object.subgroup})"
+        # if not object.type in [StudyGroup.StudyGroupType.OUTSIDER, StudyGroup.StudyGroupType.TEACHER]:
+        #     ans = ans + f" (подгруппа {object.subgroup})"
         return ans
 
     def get_timetable_link(self, object):
         return mark_safe( f"<a href={object.get_timetable_link()} target=blank>{object.__str__()}</a>")
 
+    def get_related_teacher_link(self, object):
+        teacher = object.related_teacher
+        if teacher:
+            return mark_safe(f"<a href=http://opd.iate.obninsk.ru/admin/user_accounts/customuser/{teacher.pk}/change/>{teacher.first_name} {teacher.last_name} ({teacher.username})</a>")
+        else:
+            return '---'
+
+
     get_str.short_description = "Полное название"
     get_timetable_link.short_description = "Расписание группы"
+    get_related_teacher_link.short_description = "Преподаватель"
 
-    list_display = ('get_str','type', 'year', 'get_timetable_link')
+    list_display = ('get_str','type', 'year', 'get_timetable_link','get_related_teacher_link')
     list_display_links = ('get_str',)
     sortable_by = ('get_str','type', 'year')
-    readonly_fields = ('get_str','timetable_id','get_timetable_link')
+    readonly_fields = ('get_str','timetable_id','get_timetable_link','get_related_teacher_link')
     list_filter = ('related_teacher', 'year', 'institute')
 
     fieldsets = (

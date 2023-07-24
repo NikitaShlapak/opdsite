@@ -1,15 +1,16 @@
 
 <div class="modal modal-xl fade" id="WikiHelpModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog ">
-    <div class="modal-content ">
-      <div class="modal-header">
+  <div class="modal-dialog d-block">
+    <div class="modal-content d-block">
+      <div class="modal-header d-block">
         <h1 class="modal-title fs-5" id="WikiHelpModalLabel">Доступные опции вики-разметки</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body">
         <p>Вики-разметка позволяет сделать текст логически структурированным и визульно привлекательным. В таблице представлены основные конструкции, примеры их использвания и аналоги на языке HTML.</p>
-        <table class="table table-striped  table-bordered align-middle">
+        <div class="d-block text-wrap">
+          <table class="table table-striped w-100 d-block table-bordered align-middle">
            <thead>
             <tr>
               <th scope="col">#</th>
@@ -174,7 +175,8 @@
             </tr>
 
           </tbody>
-        </table>
+         </table>
+        </div>
       </div>
 
       <div class="modal-footer">
