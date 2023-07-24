@@ -31,11 +31,13 @@
     <p class="card-text">{{ p.short_project_description }}</p>
 
   </div>
-  <div class="card-footer d-flex justify-content-evenly">
-    <a href="{% url 'project' p.pk %}" class="btn btn-primary me-2 w-25">Страница проекта</a>
-    {% if menu or request.user.is_superuser %}
-    <a href="{% url 'edit' p.pk %}" class="btn btn-success mx-2 w-25">Редактировать проект</a>
-    <a href="{% url 'set_project_status' p.pk 'delete' %}" class="btn btn-danger  ms-2 w-25">Удалить проект</a>
-    {% endif %}
+  <div class="card-footer px-1">
+  	<div class="row w-100 justify-content-evenly">
+	    <a href="{% url 'project' p.pk %}" class="btn btn-primary mx-1 my-1 col-md-3 col-sm-11">Страница проекта</a>
+	    {% if menu or request.user.is_superuser %}
+	    <a href="{% url 'edit' p.pk %}" class="btn btn-success mx-1 my-1 col-md-3 col-sm-11">Редактировать проект</a>
+	    <a href="{% url 'set_project_status' p.pk 'delete' %}" class="btn btn-danger my-1 mx-1 col-md-3 col-sm-11">Удалить проект</a>
+	    {% endif %}
+	</div>
   </div>
 </div>
