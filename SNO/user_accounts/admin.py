@@ -46,19 +46,29 @@ class CustomUserAdmin(UserAdmin):
 
 class StudyGroupAdmin(admin.ModelAdmin):
     def get_str(self, object):
-        return f"{object.__str__()}"
+        ans = f"{object.__str__()}"
+        if not object.type in [StudyGroup.StudyGroupType.OUTSIDER, StudyGroup.StudyGroupType.TEACHER]:
+            ans = ans + f" (подгруппа {object.subgroup})"
+        return ans
+
+    def get_timetable_link(self, object):
+        return mark_safe( f"<a href={object.get_timetable_link()} target=blank>{object.__str__()}</a>")
 
     get_str.short_description = "Полное название"
+    get_timetable_link.short_description = "Расписание группы"
 
-    list_display = ('get_str','type', 'year')
+    list_display = ('get_str','type', 'year', 'get_timetable_link')
     list_display_links = ('get_str',)
     sortable_by = ('get_str','type', 'year')
-    readonly_fields = ('get_str',)
+    readonly_fields = ('get_str','timetable_id','get_timetable_link')
+    list_filter = ('related_teacher', 'year', 'institute')
 
     fieldsets = (
-        ('Основное', {"fields": ("get_str",'related_teacher')}),
-        ("Данные о группе", {"fields": ("type", "subgroup", "year")}),
+        ('Основное', {"fields": ("get_str",'related_teacher','get_timetable_link')}),
+        ("Данные о группе", {"fields": ("type",'numgroup','institute' ,"subgroup", "year",'is_foreigns','course')}),
+        ('Служебная информация', {'fields':('timetable_id',)}),
     )
+
 
 class VKTokenConnectionAdmin(admin.ModelAdmin):
     list_display = ('email','user_id', 'expires_in', 'dt_created')

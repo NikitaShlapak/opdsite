@@ -3,6 +3,13 @@ from datetime import datetime
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+institutes_and_groups =[
+    ['ТФ','ЯЭТ','ТД', 'Э','ЯФТ', 'МФ','МН', 'САУ','Р','УОС','РБ', 'АЭС','ЯРМ','ЯЭУ', 'ЭиА','ФКС', 'МТМ',  'ПМФ'],#ЯФиТ
+    ['ХИМ','ЛД','БИО', 'ХФМ',  'ПМК' ],#ОБТ
+    ['УСЭС','БИЗ','ЭКН','ГМУ'],#СЭН
+    ['ИВТ', 'МЕН','ИС',  'АУТ','М' ],#ИИКС
+]
+
 
 class StudyGroup(models.Model):
     related_teacher = models.ForeignKey('CustomUser', verbose_name='Преподаватель', on_delete=models.SET_NULL, null=True)
@@ -20,6 +27,7 @@ class StudyGroup(models.Model):
         MTM = 'МТМ', 'МТМ'
         MF = 'МФ', 'МФ'
         TD = 'ТД', 'ТД'
+        LD = 'ЛД', 'ЛД'
         TF = 'ТФ', 'ТФ'
         HIM = 'ХИМ', 'ХИМ'
         HFM = 'ХФМ', 'ХФМ'
@@ -28,31 +36,68 @@ class StudyGroup(models.Model):
         YAET = 'ЯЭТ', 'ЯЭТ'
         TEACHER = 'Преподаватель', 'Преподаватель'
         OUTSIDER = 'Внешний менеджер', 'Внешний менеджер'
+    class StudyGroupCourseType(models.TextChoices):
+        SPEC = 'С', 'Специалитет'
+        BACH = 'Б', 'Бакалавриат'
+        MAG = 'М', 'Магистратура'
+        ASP = 'А', 'Аспирантура'
 
-    type = models.CharField(max_length=50, verbose_name='Тип группы',choices=StudyGroupType.choices, default=StudyGroupType.OUTSIDER)
+        OTHER = '', 'Другое'
+    class StudyGroupInstituteType(models.TextChoices):
+        YaFIT = 'оЯФиТ', 'отделение ядерной физики и технологий'
+        OBT = 'ОБТ', 'отделение биотехнологий'
+        SEN = 'СЭН', 'социально-экономическое направление'
+        IKS = 'ИИКС', 'институт интеллектуальных и кибернетических систем'
 
+        OTHER = '', 'Другое'
+
+    type = models.CharField(max_length=50, verbose_name='Тип группы', choices=StudyGroupType.choices,
+                            default=StudyGroupType.OUTSIDER)
+    institute = models.CharField(max_length=50, verbose_name='Отделение', choices=StudyGroupInstituteType.choices,
+                              default=StudyGroupInstituteType.OTHER)
     year = models.SmallIntegerField(verbose_name='год поступления', default=datetime.today().year)
     subgroup = models.SmallIntegerField(default=0, verbose_name='Подгруппа')
+    course = models.CharField(max_length=50, verbose_name='Программа обучения', choices=StudyGroupCourseType.choices,
+                              default=StudyGroupCourseType.OTHER)
+    numgroup = models.SmallIntegerField(default=0, verbose_name='Номер группы', help_text='оставьте 0, если такая группа на потоке единственная')
+    timetable_id = models.IntegerField(default=111, verbose_name='id группы в расписании')
+    is_foreigns = models.BooleanField(default=False, verbose_name='Иностранцы')
 
     def __str__(self):
-        study_type = {
-            'bachelors': ['БИЗ', 'БИО', 'ИВТ', 'ИС', 'М', 'МЕН', 'МТМ', 'МФ', 'ТД', 'ТФ', 'ХИМ', 'ХФМ', 'ЭКН', 'ЯФТ',
-                          'ЯЭТ'],
-            'specialists': ['АЭС', 'ЛД', 'ЭиА', 'ЯРМ'],
-        }
         ans = self.type
+        if not self.type in [self.StudyGroupType.OUTSIDER, self.StudyGroupType.TEACHER]:
+            app_sub=''
+            app_num=''
+            app_type = f'-{self.course}{int(self.year) % 1000}'
 
-        if ans in study_type['bachelors']:
-            if self.subgroup:
-                ans = ans + f"{self.subgroup}-Б{self.year%1000}"
-            else:
-                ans = ans + f"-Б{self.year%1000}"
-        elif ans in study_type['specialists']:
-            if self.subgroup:
-                ans = ans + f"{self.subgroup}-C{self.year%1000}"
-            else:
-                ans = ans + f"-C{self.year%1000}"
+            if self.numgroup:
+                app_num = self.numgroup
+
+            ans = ans + f"{app_num}{app_type}{app_sub}"
+            if self.is_foreigns:
+                ans = ans+'и'
         return ans
+
+    def get_timetable_link(self):
+        return f"http://timetable.iate.obninsk.ru/group/{self.timetable_id}"
+    def set_institute(self):
+        if   self.type in institutes_and_groups[0]:
+            self.institute = self.StudyGroupInstituteType.YaFIT
+        elif self.type in institutes_and_groups[1]:
+            self.institute = self.StudyGroupInstituteType.OBT
+        elif self.type in institutes_and_groups[2]:
+            self.institute = self.StudyGroupInstituteType.SEN
+        elif self.type in institutes_and_groups[3]:
+            self.institute = self.StudyGroupInstituteType.IKS
+        else:
+            self.institute = self.StudyGroupInstituteType.OTHER
+
+    def get_study_year(self):
+        dif = datetime.today().year - self.year
+        if 1< datetime.today().month<8:
+            dif = dif+1
+        return dif
+
     class Meta:
         verbose_name = 'Учебная группа'
         verbose_name_plural = 'Учебные группы'
