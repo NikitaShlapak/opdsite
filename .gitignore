@@ -1,6 +1,9 @@
 SNO/SNO/env.py
 media/
 SNO/*/migrations/
+SNO/static/admin/
+SNO/static/rest_framework/
+
 
 
 
