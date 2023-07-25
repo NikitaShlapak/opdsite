@@ -29,17 +29,17 @@
             aria-expanded="false" aria-label="Toggle navigation"
             >
 
-      Навигация
+      <img width="50px" src="{% static 'main\images\navi.svg' %}" alt="Навигация" >
     </button>
      {% if not request.user.is_authenticated %}
-    <p class="navbar-text my-2">Вы не авторизованы
-      <a class="navbar-brand px-2 mx-0" href="{% url 'account_signup' %}">Регистрация</a> |
-      <a class="navbar-brand px-2 mx-0" href="{% url 'account_login' %}">Войти</a>
+    <p class="navbar-text my-1 py-0"><img height="25px" src="{% static 'main\images\no_profile.svg' %}" alt="Вы не авторизованы" >
+      <a class="navbar-brand px-1 mx-0 pt-0" href="{% url 'account_signup' %}">Регистрация</a> |
+      <a class="navbar-brand px-1 mx-0 pt-0" href="{% url 'account_login' %}">Вход</a>
     </p>
       {% else %}
-    <p class="navbar-text my-2"><i><u>{{ request.user.username }}</u></i>:
-      <a class="navbar-brand px-2 mx-0" href="{% url 'profile' %}">Профиль</a> |
-      <a class="navbar-brand px-2 mx-0" href="{% url 'account_logout' %}">Выйти</a>
+    <p class="navbar-text my-2"><p class="navbar-text my-2"><img height="20px" src="{% static 'main\images\profile.svg' %}" alt="Вы не авторизованы" > <i><u>{{ request.user.username }}</u></i>:
+      <a class="navbar-brand px-1 mx-0 pt-0" href="{% url 'profile' %}">Профиль</a> |
+      <a class="navbar-brand px-1 mx-0 pt-0" href="{% url 'account_logout' %}">Выйти</a>
     </p>
         {% endif %}
 
