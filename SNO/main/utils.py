@@ -70,6 +70,8 @@ def user_can_mark_reports(user:CustomUser, project:Project):
     return True
 
 def get_all_unmarked_reports(user:CustomUser, project:Project):
+    if not user.study_group:
+        return None
     if user.study_group.type != StudyGroup.StudyGroupType.TEACHER:
         return None
     else:
