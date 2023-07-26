@@ -93,15 +93,16 @@ class SignupWithVKView(DataMixin, FormView):
                         'email':connection.email,
                         'username':translit(f"{info['first_name'].capitalize()}{info['last_name'].capitalize()}@{vk_id}", language_code='ru', reversed=True),
                         }
-        return super().get(request, args, kwargs)
+        return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
         data = form.cleaned_data
         study_group = data.pop('study_group')
         password = data.pop('password1')
         data.pop('password2')
+        username = data.pop('username')
         try:
-            user = CustomUser.objects.create(**data, password=password, study_group=study_group)
+            user, = CustomUser.objects.get_or_create(username=username,defaults=data|dict(password=password, study_group=study_group))
         except:
             logging.error('Can not create user')
         else:

@@ -123,9 +123,9 @@ class CustomUser(AbstractUser):
 
     username = models.CharField(max_length=50, verbose_name='Имя пользователя', unique=True,
                                 error_messages={'unique': "Пользователь с таким именем уже зарегистрирован!"})
-    password = models.CharField(max_length=255, verbose_name='Пароль')
+    password = models.CharField(max_length=255, verbose_name='Пароль', null=False, blank=False)
     email = models.EmailField(unique=False, verbose_name='Почта', #TODO: set 'unique' to TRUE for prod!
-                              error_messages={'unique': "К этой почте уже привязана учётная запись!"})
+                              error_messages={'unique': "К этой почте уже привязана учётная запись!"},  null=False, blank=False)
     registration_time = models.DateTimeField('Дата регистрации', auto_now_add=True)
 
     study_group = models.ForeignKey(StudyGroup,verbose_name='Учебная группа', null=True, on_delete=models.SET_NULL, blank=True)

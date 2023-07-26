@@ -240,15 +240,11 @@ class ProjectUpdateView(DataMixin, LoginRequiredMixin, UpdateView):
         c_def = self.get_user_context(selected='register')
         return context | c_def
 
-    # def handle_no_permission(self):
-    #     return redirect('user_accounts:login')
-
 class SetProjectStatusView(DataMixin, LoginRequiredMixin, View):
-    # def handle_no_permission(self):
-    #     return redirect('user_accounts:login')
+
     def get(self, request, **kwargs):
         project = get_object_or_404(Project,pk=kwargs['project_id'])
-        if not (request.user.is_staff or request.user.is_superuser):
+        if not (request.user.is_staff or request.user.is_superuser or request.user == project.manager):
             self.handle_no_permission()
         else:
             if kwargs['action'] == 'confirm':

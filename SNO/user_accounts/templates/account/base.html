@@ -19,25 +19,21 @@
 
     let inputs = document.querySelectorAll('input')
     inputs.forEach(element => {
-        console.log(element.type)
         if (element.type=='text'||element.type=='email'||element.type=='password'){
             element.classList.add('form-control');
         }
         if (element.name=='study_group'){
             element.classList.add('btn btn-outline-secondary dropdown-toggle')
         }
-        console.log(element)
     });
     let dropdowns = document.querySelectorAll('select')
     dropdowns.forEach(element => {
-        console.log(element.type)
         if (element.name=='study_group'){
             element.classList.add('btn')
             element.classList.add('btn-light')
             element.classList.add('dropdown-toggle')
             element.classList.add('border')
         }
-        console.log(element)
     });
 
 </script>
