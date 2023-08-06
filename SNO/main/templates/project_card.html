@@ -23,7 +23,7 @@
     </div>
 </div>
   </div>
-  <a href="{% url 'project' p.pk %}"><img src=" {{ p.poster.url }} " class="card-img-top" alt="{{ p.poster.url }}" height="400em" style="object-fit:cover"></a>
+  <a href="{% url 'project' p.pk %}" class="mx-auto"><img src=" {{ p.poster.url }} " class="card-img-top poster" alt="{{ p.poster.url }}" ></a>
   <div class="card-body">
     <h4 class="card-title">Тип проекта: {{ p.get_project_type_display }} | Куратор: {{ p.manager.get_full_name }}</h4>
     <h5 class="card-title">{{ p.get_project_status_display }}</h5>
@@ -31,13 +31,38 @@
     <p class="card-text">{{ p.short_project_description }}</p>
 
   </div>
-  <div class="card-footer px-1">
-  	<div class="row w-100 justify-content-evenly">
-	    <a href="{% url 'project' p.pk %}" class="btn btn-primary mx-1 my-1 col-md-3 col-sm-11">Страница проекта</a>
+  <div class="card-footer">
+      <div class="row">
+         <div class=" py-1
+          {% if menu or request.user.is_superuser %}
+          col-md-4 col-sm-12
+          {% else %}
+          col-12
+          {% endif %}
+          ">
+            <a href="{% url 'project' p.pk %}" class="btn btn-primary w-100 h-100 d-md-flex align-items-center justify-content-center" >Страница проекта</a>
+         </div>
+
 	    {% if menu or request.user.is_superuser %}
-	    <a href="{% url 'edit' p.pk %}" class="btn btn-success mx-1 my-1 col-md-3 col-sm-11">Редактировать проект</a>
-	    <a href="{% url 'set_project_status' p.pk 'delete' %}" class="btn btn-danger my-1 mx-1 col-md-3 col-sm-11">Удалить проект</a>
+        <div class=" py-1 col-md-4 col-sm-12">
+	        <a href="{% url 'edit' p.pk %}" class="btn btn-success w-100 h-100 d-md-flex align-items-center justify-content-center">Редактировать проект</a>
+        </div>
+        <div class=" py-1 col-md-4 col-sm-12">
+	        <a href="{% url 'set_project_status' p.pk 'delete' %}" class="btn btn-danger w-100  h-100 d-md-flex align-items-center justify-content-center">Удалить проект</a>
+        </div>
 	    {% endif %}
-	</div>
+      </div>
   </div>
 </div>
+
+<style>
+    a.btn:{
+    display:block;
+    padding:auto;
+    }
+    img.poster:{
+        max-height:400px;
+        width:100%;
+    }
+
+</style>

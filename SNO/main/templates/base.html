@@ -20,7 +20,7 @@
 
 
 
-<nav class="navbar navbar-expand-md d-md-none sticky-top  bg-primary border-bottom border-bottom-dark" >
+<nav class="navbar navbar-expand-md d-md-none sticky-top bg-primary border-bottom border-bottom-dark" >
   <div class="container-fluid">
       <button class="navbar-toggler py-2 px-3" type="button"
             data-bs-toggle="offcanvas"
@@ -29,7 +29,7 @@
             aria-expanded="false" aria-label="Toggle navigation"
             >
 
-      <img width="50px" src="{% static 'main\images\navi.svg' %}" alt="Навигация" >
+      <span class="navbar-toggler-icon"></span>
     </button>
      {% if not request.user.is_authenticated %}
     <p class="navbar-text my-1 py-0"><img height="25px" src="{% static 'main\images\no_profile.svg' %}" alt="Вы не авторизованы" >
@@ -52,7 +52,7 @@
 <div class="row w-100 p-0 m-0">
     <div class="offcanvas-md offcanvas-start col-md-3 p-0" tabindex="-1" id="offcanvasResponsive" aria-labelledby="offcanvasResponsiveLabel">
       <div class="offcanvas-header bg-primary">
-        <h5 class="offcanvas-title text-white" id="offcanvasResponsiveLabel">Навигация</h5>
+        <h5 class="offcanvas-title text-white" id="offcanvasResponsiveLabel">Меню</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#offcanvasResponsive" aria-label="Close"></button>
       </div>
 
