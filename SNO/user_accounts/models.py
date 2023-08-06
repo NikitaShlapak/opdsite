@@ -121,7 +121,7 @@ class StudyGroup(models.Model):
 
 class CustomUser(AbstractUser):
 
-    username = models.CharField(max_length=50, verbose_name='Имя пользователя', unique=True,
+    username = models.CharField(max_length=50, verbose_name='Логин', unique=True,
                                 error_messages={'unique': "Пользователь с таким именем уже зарегистрирован!"})
     password = models.CharField(max_length=255, verbose_name='Пароль', null=False, blank=False)
     email = models.EmailField(unique=False, verbose_name='Почта', #TODO: set 'unique' to TRUE for prod!

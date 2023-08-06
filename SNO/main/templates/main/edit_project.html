@@ -25,24 +25,26 @@
               </div>
           </div>
           <h3 class="card-title px-2">Тип проекта: {{ p.get_project_type_display }} </h3>
-          <img src="{{ p.poster.url }}"  alt="{{ p.poster.url }}" height="400px"style="object-fit:cover">
+          <div class="mx-auto"><img src=" {{ p.poster.url }} " class="card-img-top " alt="{{ p.poster.url }}" style="max-height:400px" ></div>
             <form id="form" method="post" enctype="multipart/form-data">
                 <div class="card-body">
                         {% csrf_token %}
+                    {% if form.non_field_errors %}
                     <div class="mb-3 text fs-5 text-danger">
                       {{ form.non_field_errors }}
                     </div>
+                    {% endif %}
 
                         {% for f in form %}
                     {{ f.errors }}
                             {% if f != form.poster %}
 
-                                <div class="input-group p-2 mb-3">
-                                  <div class="input-group-text w-25">
+                                <div class="input-group py-2 mb-3 w-100 d-flex">
+                                  <div class="input-group-text col-md-4 col-sm-12 w-100" style="border-radius: 0px;">
                                           <label for="{{ f.id_for_label }}" class="form-label text text-wrap">{{ f.label }}</label>
                                   </div>
                                     {% if f == form.target_groups %}
-                                    <div class="d-flex border rounded-end pt-2 flex-row w-75">
+                                    <div class="d-flex border pt-2 flex-row w-100" style="border-radius: 0px;">
                                     {% endif %}
                                         {{ f }}
                                     {% if f == form.target_groups %}
@@ -62,10 +64,34 @@
 
 
                 </div>
-                <div class="card-footer d-flex justify-content-evenly">
-                    <button type="submit" class="btn my-3 w-25 mx-2 btn-primary">Сохранить изменения</button>
-                    <a href="{% url 'project' p.pk %}" type="button" class="btn my-3 w-25 mx-2 btn-danger">Назад</a>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-12">
+                            <button type="submit" class="btn my-2 w-100 btn-primary">Сохранить изменения</button>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                            <a href="{% url 'project' p.pk %}" type="button" class="btn w-100 my-2 btn-danger">Назад</a>
+                        </div>
+                    </div>
                 </div>
             </form>
 </div>
+<script>
+    let inputs = document.querySelectorAll('input[name=target_groups]')
+    inputs.forEach(el => {
+        label = el.parentElement
+        label.innerHTML = label.innerHTML.replace(' (подгруппа 1)', '')
+    })
+
+</script>
+<style>
+    .poster{
+        max-height:200px;
+        width:100%;
+    }
+    .input-group-text, .form-control{
+    border-radius: 0px;
+    margin:0px !important;
+    }
+</style>
 {% endblock %}

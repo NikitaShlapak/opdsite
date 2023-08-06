@@ -21,8 +21,8 @@
 
             {% if f != form.poster %}
 
-                <div class="input-group mt-3 row">
-                  <div class="input-group-text col-md-3 ">
+                <div class="input-group mt-3">
+                  <div class="input-group-text w-100">
                           <label for="{{ f.id_for_label }}" class="form-label text-wrap text-start">{{ f.label }}
                           {% if f == form.long_project_description %}
                               <br>
@@ -34,7 +34,7 @@
                   </div>
 
                    {% if f == form.target_groups %}
-                                    <div class="d-flex border rounded-end pt-2 flex-row col-md-9">
+                                    <div class="d-flex border rounded-end pt-2 flex-row w-100">
                    {% endif %}
                                         {{ f }}
                    {% if f == form.target_groups %}
@@ -52,6 +52,7 @@
                           <label for="{{ f.id_for_label }}" class="form-label">{{ f.label }}</label>
 
                   {{ f }}
+                    <p>Рекомендуется загружать постер размером 700х400px (ширина х высота)</p>
                 </div>
             {% endif %}
      {{ f.errors }}
@@ -73,5 +74,10 @@
     })
 
 </script>
-
+<style>
+    .input-group-text, .form-control{
+    border-radius: 0px;
+    margin:0px !important;
+    }
+</style>
 {% endblock %}

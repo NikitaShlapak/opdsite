@@ -23,7 +23,7 @@
     </div>
 </div>
   </div>
-  <a href="{% url 'project' p.pk %}" class="mx-auto"><img src=" {{ p.poster.url }} " class="card-img-top poster" alt="{{ p.poster.url }}" ></a>
+  <a href="{% url 'project' p.pk %}" class="mx-auto"><img src=" {{ p.poster.url }} " class="card-img-top d-block" alt="{{ p.poster.url }}" style="max-height:400px" ></a>
   <div class="card-body">
     <h4 class="card-title">Тип проекта: {{ p.get_project_type_display }} | Куратор: {{ p.manager.get_full_name }}</h4>
     <h5 class="card-title">{{ p.get_project_status_display }}</h5>
@@ -55,14 +55,3 @@
   </div>
 </div>
 
-<style>
-    a.btn:{
-    display:block;
-    padding:auto;
-    }
-    img.poster:{
-        max-height:400px;
-        width:100%;
-    }
-
-</style>
