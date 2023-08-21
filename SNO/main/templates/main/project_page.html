@@ -82,168 +82,82 @@
                       <a href="{% url 'add_report' p.pk %}#form" class="btn btn-primary" role="button">Добавить отчёт</a>
                     {% endif %}{% endif %}
                       {% for r in reports %}
-
-                  <div class="row">
-                      <div class="card my-3 p-0 col">
-                          <div class="card-header">
-                              <div class="row">
-                                  <div class="col-6">
-                                      <h5 class="text text-start">
-                                      {{ r.report.author }}
-                                      </h5>
-                                  </div>
-                                  <div class="col-6">
-                                      <h5 class="text text-end">
-                                      {{ r.report.publishing_time }}
-                                      </h5>
-                                  </div>
-                              </div>
-                          </div>
-                          <div class="card-body">
-                             <h4>{{ r.report.heading }}</h4>
-                              <hr>
-                              <p>{{ r.report.get_html_text|safe }}</p>
-
-                          {% if r.file %}
-                              <hr>
-                              <a href="{{ r.file.url }}" class="d-flex text-decoration-none align-items-center">
-                                  <img src="{% static 'main\images\logos\file_icon.svg' %}" alt="" height="50" width="50">
-                                  <span class="text text-dark fs-4">{{r.report.get_file_content_type}}</span>
-                              </a>
-
-                          {% endif %}
-                          </div>
-                          {% if r.report.projectreportmark_set.count %}
-                          <div class="card-footer">
-                              <div class="row">
-                                  <div class="col text-start">
-                                      <h4>
-                                          Оценка:
-                                          <u class="
-                                      {% if r.report.get_average_mark < 60 %} text-danger
-                                      {% elif r.report.get_average_mark < 70 %} text-secondary
-                                      {% elif r.report.get_average_mark < 90 %} text-primary
-                                      {% else %} text-success {% endif %}">{{ r.report.get_average_mark }}</u>
-                                      </h4>
-                                  </div>
-                                  <div class="col text-end">
-                                      <h4>Всего оценок: {{ r.report.projectreportmark_set.count }}</h4>
-                                  </div>
-                              </div>
-                          </div>
-                          {% endif %}
-                      </div>
-
-                        {% if reports_markable %}
-                    {% if r.report.is_markable %}
-                      <div class="card p-0 my-3 mx-2 col-auto" style="max-width: 500px">
-                          <div class="card-header">
-                              <h5 class="text-center">Моя оценка</h5>
-                          </div>
-
-                          {% if r.mark %}
-                          <div class="card-body pt-4">
-                              <h1 class="text-center
-{% if r.mark.value < 60 %} text-danger {% elif r.mark.value < 70 %} text-secondary {% elif r.mark.value < 90 %} text-primary {% else %} text-success {% endif %}">
-                                  {{ r.mark.value }}
-                              </h1>
-                              <p class="text-center">{{r.mark.creation_time|date}}</p>
-                          </div>
-                          <div class="card-footer">
-                              <a href="{% url 'create_mark' r.report.pk %}" role="button"class="btn btn-primary">Изменить оценку</a>
-                          </div>
-                          {% else %}
-                          <div class="card-body pt-4">
-                              <h1 class="text-center">-</h1>
-                              <p class="text-center">Вы ещё не оценили <br> этот отчёт</p>
-                          </div>
-                          <div class="card-footer">
-                              <a href="{% url 'create_mark' r.report.pk %}" role="button"class="btn btn-success w-100 text-center">Оценить</a>
-                          </div>
-                          {% endif %}
-                      </div>
-                      {% endif %}
-                      {% endif %}
-
-                      </div>
+                        {% include 'report_card.html' %}
                       {% endfor %}
-
                   {% endif %}
               </div>
             </div>
     </div>
 {% if p.manager == request.user or request.user.is_staff %}
 <div class="col-xl-3">
-    <div class="offcanvas-xl offcanvas-end  p-0 " data-bs-backdrop="false" data-bs-scroll="true" tabindex="-1" id="offcanvasResponsivePanel" aria-labelledby="offcanvasResponsiveLabel">
+    <div class="offcanvas-xl offcanvas-end  sticky-xl-top p-0 " data-bs-backdrop="false" data-bs-scroll="true" tabindex="-1" id="offcanvasResponsivePanel" aria-labelledby="offcanvasResponsiveLabel">
       <div class="offcanvas-header bg-primary">
         <h5 class="offcanvas-title text-white" id="offcanvasResponsiveLabel">Управление проектом</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#offcanvasResponsivePanel" aria-label="Close"></button>
       </div>
 
       <div class="offcanvas-body d-block">
-
-
-        <div class="card sticky-top  ">
-            <div class="card-header">
-                <h5>Действия с проектом</h5>
-            </div>
-            <div class="card-body p-1">
-                    {% if p.project_status == 'under_review' or p.project_status == 'rejected' or request.user.is_superuser %}
-                        <a href="{% url 'edit' p.pk %}" role="button" class="btn btn-outline-success w-100 mt-2">Редактировать</a>
-                    {% endif %}
-                    {% if p.manager == request.user or request.user.is_superuser %}
-                        {% if p.project_status == 'opened'  %}
-                            <a href="{% url 'set_project_status' p.pk 'close' %}" role="button" class="btn btn-outline-primary w-100 mt-2">Закрыть Набор</a>
+            <div class="card  ">
+                <div class="card-header">
+                    <h5>Действия с проектом</h5>
+                </div>
+                <div class="card-body p-1">
+                        {% if p.project_status == 'under_review' or p.project_status == 'rejected' or request.user.is_superuser %}
+                            <a href="{% url 'edit' p.pk %}" role="button" class="btn btn-outline-success w-100 mt-2">Редактировать</a>
                         {% endif %}
-                    {% endif %}
-                    {% if request.user != p.manager or request.user.is_superuser %}
-                        {% if  request.user.is_staff or request.user.is_superuser %}
-                            {% if p.project_status == 'under_review' or p.project_status == 'rejected' or request.user.is_superuser %}
-                                {% if p.project_status == 'under_review' or p.project_status == 'rejected' %}
-                                    <br>
-                                    <a href="{% url 'set_project_status' p.pk 'confirm' %}" role="button" class="btn btn-outline-success w-100 mt-2" >Подтвердить</a>
-                                {% endif %}
-
-                                    <br>
-                                    <a role="button" class="btn btn-outline-danger w-100 mt-2" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">Отклонить</a>
-
+                        {% if p.manager == request.user or request.user.is_superuser %}
+                            {% if p.project_status == 'opened'  %}
+                                <a href="{% url 'set_project_status' p.pk 'close' %}" role="button" class="btn btn-outline-primary w-100 mt-2">Закрыть Набор</a>
                             {% endif %}
                         {% endif %}
-                    {% endif %}
+                        {% if request.user != p.manager or request.user.is_superuser %}
+                            {% if  request.user.is_staff or request.user.is_superuser %}
+                                {% if p.project_status == 'under_review' or p.project_status == 'rejected' or request.user.is_superuser %}
+                                    {% if p.project_status == 'under_review' or p.project_status == 'rejected' %}
+                                        <br>
+                                        <a href="{% url 'set_project_status' p.pk 'confirm' %}" role="button" class="btn btn-outline-success w-100 mt-2" >Подтвердить</a>
+                                    {% endif %}
 
-                    {% if request.user == p.manager or request.user.is_superuser %}
-                    <br>
-                    <a href="{% url 'set_project_status' p.pk 'delete' %}" role="button" class="btn btn-danger w-100 mt-2">Удалить</a>
-                    {% endif %}
-            </div>
-        </div>
-    {% if applyies %}
-        <div class="card p-0 mt-2  ">
-            <div class="card-header">
-                <h5>Заявки</h5>
-            </div>
-            {% for ap in applyies %}
-            <hr class="my-0">
-                <div class="row px-1">
-                    <div class="col border-end pt-2">
-                        <a href="" class="align-middle text-decoration-none ">{{ap.user}}</a>
-                    </div>
-                    <div class="col-auto border-end px-1">
-                        <a href="{% url 'apply_or_decline' ap.pk 'confirm' %}">
-                            <img src="{% static 'main\images\confirm.svg' %}" alt="confirm" height="45px" >
-                        </a>
-                    </div>
-                    <div class="col-auto ps-1 pe-2 ">
-                        <a href="{% url 'apply_or_decline' ap.pk 'delete' %}">
-                            <img src="{% static 'main\images\decline.svg' %}" alt="decline" height="45px">
-                        </a>
-                    </div>
+                                        <br>
+                                        <a role="button" class="btn btn-outline-danger w-100 mt-2" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">Отклонить</a>
+
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+
+                        {% if request.user == p.manager or request.user.is_superuser %}
+                        <br>
+                        <a href="{% url 'set_project_status' p.pk 'delete' %}" role="button" class="btn btn-danger w-100 mt-2">Удалить</a>
+                        {% endif %}
                 </div>
-            {% endfor %}
-        </div>
-    {% endif %}
+            </div>
+        {% if applyies %}
+            <div class="card   mt-2">
+                <div class="card-header">
+                    <h5>Заявки</h5>
+                </div>
+                {% for ap in applyies %}
+                <hr class="my-0">
+                    <div class="row px-1">
+                        <div class="col border-end pt-2">
+                            <a href="" class="align-middle text-decoration-none ">{{ap.user}}</a>
+                        </div>
+                        <div class="col-auto border-end px-1">
+                            <a href="{% url 'apply_or_decline' ap.pk 'confirm' %}">
+                                <img src="{% static 'main\images\confirm.svg' %}" alt="confirm" height="45px" >
+                            </a>
+                        </div>
+                        <div class="col-auto ps-1 pe-2 ">
+                            <a href="{% url 'apply_or_decline' ap.pk 'delete' %}">
+                                <img src="{% static 'main\images\decline.svg' %}" alt="decline" height="45px">
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+      </div>
 
-        </div>
     </div>
 </div>
 {% endif %}

@@ -1,0 +1,83 @@
+{% load static %}
+<div class="row">
+                      <div class="card my-3 p-0 col position-relative">
+                          <div class="card-header">
+                              <div class="row justify-content-between">
+                                  <div class="col-md-8 pe-0">
+                                      <h5 class="text text-start">
+                                      {{ r.report.author }}
+                                      </h5>
+                                      <time>{{ r.report.publishing_time|date:"d.m.20y H:m" }}</time>
+                                  </div>
+                                  {% if r.mark %}
+                                  <div class="d-md-flex d-none col ps-0  justify-content-end">
+                                      <p class="text text-center fs-5 m-0">
+
+                                        Оценка: <br>
+
+                                        <span class="
+                                        {% if r.report.get_average_mark < 60 %} text-danger
+                                      {% elif r.report.get_average_mark < 70 %} text-secondary
+                                      {% elif r.report.get_average_mark < 90 %} text-info
+                                      {% else %} text-success {% endif %}">
+                                          <b>{{ r.report.get_average_mark }}</b></span><br> из 100
+
+                                      </p>
+                                  </div>
+                                  <span class=" rounded-pill border border-2 w-auto position-absolute bottom-100 end-0
+                                  d-block d-md-none
+                                        {% if r.report.get_average_mark < 60 %} bg-danger border-danger text-danger
+                                      {% elif r.report.get_average_mark < 70 %} bg-secondary border-secondary text-secondary
+                                      {% elif r.report.get_average_mark < 90 %} bg-info border-info text-info
+                                      {% else %} bg-success border-success text-success{% endif %}" style="--bs-bg-opacity: .1; z-index:10000">
+                                          <b>{{ r.report.get_average_mark }}</b></span>
+                                  {% endif %}
+                              </div>
+                          </div>
+                          <div class="card-body ">
+                             <h4>{{ r.report.heading }}</h4>
+                              <hr>
+                              <p>{{ r.report.get_html_text|safe }}</p>
+                          {% if r.report.file %}
+                              <hr>
+                              <a href="{{ r.file.url }}" class="d-flex text-decoration-none align-items-center">
+                                  <img src="{% static 'main\images\logos\file_icon.svg' %}" alt="" height="50" width="50">
+                                  <span class="text text-dark text-wrap text-break fs-4">{{r.report.get_file_content_type}}</span>
+                              </a>
+
+                          {% endif %}
+                          </div>
+                          {% if r.report.is_markable %}
+                          <div class="card-footer">
+                              {% if r.mark %}
+                                    <span class="position-relative w-auto">
+                                      <p class="fs-4 w-auto mb-0">
+                                          Моя оценка:
+                                          <a href="{% url 'create_mark' r.report.pk %}" class="text-decoration-none">
+                                          <u class="
+                                      {% if r.mark.value < 60 %} text-danger
+                                      {% elif r.mark.value < 70 %} text-secondary
+                                      {% elif r.mark.value < 90 %} text-primary
+                                      {% else %} text-success {% endif %}">{{ r.mark.value }}</u>
+
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                              <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"></path>
+                                              <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"></path>
+                                            </svg>
+                                          </a>
+                                      </p>
+                                        <time class="d-md-block d-none">{{r.mark.creation_time|date}}</time>
+</span>
+                              {% else %}
+                              <a href="{% url 'create_mark' r.report.pk %}" role="button"class="btn btn-success w-100 text-center">Оценить</a>
+{% endif %}
+
+
+                          </div>
+                              {% endif %}
+
+                      </div>
+
+
+
+</div>
