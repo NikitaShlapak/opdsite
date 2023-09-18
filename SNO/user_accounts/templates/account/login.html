@@ -2,6 +2,7 @@
 
 {% load i18n %}
 {% load account socialaccount %}
+{% load static %}
 
 {% block head_title %}{% trans "Sign In" %}{% endblock %}
 
@@ -18,9 +19,21 @@ for a {{ site_name }} account and sign in below:{% endblocktrans %}</p>
 
 <div class="socialaccount_ballot">
 
-  <ul class="socialaccount_providers">
-    {% include "socialaccount/snippets/provider_list.html" with process="login" %}
-  </ul>
+  {% for provider in socialaccount_providers %}
+    <a title="{{provider.name}}" class="socialaccount_provider {{provider.id}} btn btn-outline-primary py-1 d-flex align-items-center justify-content-center"
+         href="{% url 'user_accounts:login_vk' %}" style="min-width: 170px; width:10%">
+          <img class="bi mx-1" width="40" height="40" src="{% static 'main\images\logos\vk.svg' %}">
+          <span class="fs-4 mx-1">
+
+                  {% if provider.name != 'VK' %}
+                  {{provider.name}}
+                  {% else %}
+                  Вконтакте
+                  {% endif %}
+
+          </span>
+      </a>
+{% endfor %}
 
   <div class="login-or">{% trans 'or' %}</div>
 

@@ -23,7 +23,7 @@ from .forms import CustomUserCreationForm, CustomUserAuthenticationForm
 from main.utils import DataMixin, get_all_unmarked_reports, get_all_report_marks
 from main.models import Project, Applications
 from main.forms import SearchForm
-from SNO.vk_env import VK_SCOPES, VK_ID, VK_LOGIN_REDIRECT_URI, VK_SECRET
+from SNO.vk_env import VK_SCOPES, VK_ID, VK_LOGIN_REDIRECT_URI, VK_SECRET, VK_ROOT
 
 logging.basicConfig(level=logging.INFO, filename="main_views.log",filemode="a",
                     format="%(asctime)s %(levelname)s %(message)s")
@@ -42,10 +42,12 @@ def page_not_found_view(request, exception):
 
 class LinkVkView(DataMixin, View):
     def get_context_data(self, **kwargs):
+        print('--------------CONTEXT---------------')
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(selected='register')
         return context | c_def
     def get(self, request, *args,**kwargs):
+
         if request.GET:
             if request.GET['code']:
                 data = {'code':request.GET['code'],
@@ -66,7 +68,7 @@ class LinkVkView(DataMixin, View):
         return HttpResponse('GET OK')
 
     def post(self, request, *args, **kwargs):
-        print(kwargs)
+        # print(kwargs)
         connection, created = VKTokenConnection.objects.get_or_create(
             user_id=kwargs.pop('user_id'),
             defaults=kwargs
@@ -77,6 +79,7 @@ class LinkVkView(DataMixin, View):
 class SignupWithVKView(DataMixin, FormView):
     form_class = CustomUserCreationForm
     template_name = 'socialaccount/signup.html'
+    extra_data = {}
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(selected='register')
@@ -93,7 +96,7 @@ class SignupWithVKView(DataMixin, FormView):
                         'email':connection.email,
                         'username':translit(f"{info['first_name'].capitalize()}{info['last_name'].capitalize()}@{vk_id}", language_code='ru', reversed=True),
                         }
-        return super().get(request, *args, **kwargs)
+        return self.render_to_response(self.get_context_data(vk_id=vk_id))
 
     def form_valid(self, form):
         data = form.cleaned_data
@@ -102,14 +105,15 @@ class SignupWithVKView(DataMixin, FormView):
         data.pop('password2')
         username = data.pop('username')
         try:
-            user, = CustomUser.objects.get_or_create(username=username,defaults=data|dict(password=password, study_group=study_group))
+            user, created = CustomUser.objects.get_or_create(username=username,defaults=data|dict(password=password, study_group=study_group))
         except:
             logging.error('Can not create user')
         else:
             login(self.request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
             logging.info(f'User {user} logged in. Trying to link VK profile...')
             try:
-                connection = VKTokenConnection.objects.get(email=user.email)
+                print(form.data['vk_id'])
+                connection = VKTokenConnection.objects.get(user_id=form.data['vk_id'])
             except:
                 logging.error('VK connection does not exist!')
             else:
@@ -126,7 +130,42 @@ class SignupWithVKView(DataMixin, FormView):
         return redirect('profile')
 
 
-
+class LoginWithVKView(DataMixin, FormView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(selected='register')
+        return context | c_def
+    def get(self, request, *args, **kwargs):
+        if request.GET:
+            if request.GET['code']:
+                data = {'code': request.GET['code'],
+                        'client_id': VK_ID,
+                        'client_secret': VK_SECRET,
+                        'redirect_uri': VK_ROOT + request.path
+                        }
+                req = requests.get(url='https://oauth.vk.com/access_token', params=data)
+                return self.post(request, **req.json())
+        else:
+            data = {'client_id': VK_ID,
+                    'redirect_uri': VK_ROOT + request.path,
+                    'response_type': 'code',
+                    'v': '5.131',
+                    'scope': VK_SCOPES,
+                    }
+            req = requests.get(url='https://oauth.vk.com/authorize', params=data)
+            return redirect(req.url)
+        return HttpResponse('GET OK')
+    def post(self, request, *args, **kwargs):
+        print(kwargs)
+        try:
+            socialaccount = SocialAccount.objects.get(
+                uid=kwargs.pop('user_id')
+            )
+        except:
+            print('user not found')
+        user = socialaccount.user
+        login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
+        return redirect('profile')
 
 def logout(request):
     django_logout(request)

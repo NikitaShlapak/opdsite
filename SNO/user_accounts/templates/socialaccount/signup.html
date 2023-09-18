@@ -9,7 +9,9 @@
 
 <p>{% blocktrans with provider_name=account.get_provider.name site_name=site.name %}You are about to use your {{provider_name}} account to login to
 {{site_name}}. As a final step, please complete the following form:{% endblocktrans %}</p>
-
+{% if vk_id %}
+<p>Данные аккаунта <a href="https://vk.com/id{{ vk_id }}"> @id{{vk_id}} </a>  подгружены</p>
+{% endif %}
 <form class="signup" id="signup_form" method="post" action="{% url 'user_accounts:signup_vk_complete' %}">
   {% csrf_token %}
   {% for f in form %}
@@ -30,6 +32,7 @@
   {% if redirect_field_value %}
   <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
   {% endif %}
+  <input type="hidden" name="vk_id" value="{{ vk_id }}">
   <button type="submit" class="btn btn-primary">{% trans "Sign Up" %} &raquo;</button>
 </form>
 

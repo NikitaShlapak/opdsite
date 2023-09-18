@@ -30,7 +30,7 @@ class CustomUserCreationForm(SignupForm):
 
     class Meta(SignupForm):
         model = CustomUser
-        fields = ['username', 'password1', 'password2','last_name', 'first_name', 'email', 'study_group']
+        fields = ['username', 'password1', 'password2','last_name', 'first_name', 'email', 'study_group','vk_id']
         widgets = {
             'login': forms.TextInput(attrs={'class': 'form-control'}),
             'username': forms.TextInput(attrs={'class': 'form-control'}),
@@ -39,7 +39,8 @@ class CustomUserCreationForm(SignupForm):
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'},),
             'study_group': forms.Select(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'})
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+
         }
 
 class CustomUserAuthenticationForm(LoginForm):

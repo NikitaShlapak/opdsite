@@ -143,6 +143,7 @@ class VKTokenConnection(models.Model):
     email = models.EmailField(unique=False, verbose_name='Почта', #TODO: set 'unique' to TRUE for prod!
                               error_messages={'unique': "К этой почте уже привязана учётная запись!"})
     user_id = models.CharField(max_length=50, verbose_name='VK ID')
+    # first_name =
     access_token = models.TextField(verbose_name='Токен')
     expires_in = models.IntegerField(verbose_name='Время действия (в секундах)', help_text='Если 0, то токен бессрочный')
     dt_created = models.DateTimeField(verbose_name='Время создания', auto_now_add=True)

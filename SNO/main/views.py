@@ -4,7 +4,6 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 
-
 from django.views import View
 from django.views.generic import UpdateView, CreateView, DetailView, TemplateView, FormView
 

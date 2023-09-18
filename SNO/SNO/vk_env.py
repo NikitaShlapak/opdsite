@@ -1,4 +1,5 @@
-VK_LOGIN_REDIRECT_URI = 'http://opd.iate.obninsk.ru/acc/link/vk/'
+VK_ROOT = 'http://127.0.0.1:8000'
+VK_LOGIN_REDIRECT_URI = f'{VK_ROOT}/acc/link/vk/'
 VK_ID = 51666712
 VK_SCOPES = ['138477569']
 # ,'status','email','phone_number'
