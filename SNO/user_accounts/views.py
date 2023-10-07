@@ -37,9 +37,6 @@ def page_not_found_view(request, exception):
     return render(request,'404.html', context=data)
 
 
-
-
-
 class LinkVkView(DataMixin, View):
     def get_context_data(self, **kwargs):
         print('--------------CONTEXT---------------')
