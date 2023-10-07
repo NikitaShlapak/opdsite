@@ -1,4 +1,4 @@
-VK_ROOT = 'http://127.0.0.1:8000'
+VK_ROOT = 'http://opd.iate.obninsk.ru'
 VK_LOGIN_REDIRECT_URI = f'{VK_ROOT}/acc/link/vk/'
 VK_ID = 51666712
 VK_SCOPES = ['138477569']
